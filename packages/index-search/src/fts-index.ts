@@ -2,7 +2,7 @@
  * SQLite FTS5 기반 전문 검색 엔진
  */
 
-import { Database } from 'better-sqlite3';
+import Database from 'better-sqlite3';
 import { logger, SearchResult } from '@memory-mcp/common';
 import { MarkdownNote } from '@memory-mcp/common';
 import {

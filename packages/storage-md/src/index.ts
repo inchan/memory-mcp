@@ -15,6 +15,12 @@ export * from './note-manager';
 // 파일 감시
 export * from './watcher';
 
+// 백링크 자동 관리
+export * from './backlink-manager';
+
+// PARA 구조 관리
+export * from './para-manager';
+
 // 타입 정의
 export * from './types';
 
