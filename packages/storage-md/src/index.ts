@@ -15,6 +15,9 @@ export * from './note-manager';
 // 파일 감시
 export * from './watcher';
 
+// Git 스냅샷/백업
+export * from './git-snapshot';
+
 // 백링크 자동 관리
 export * from './backlink-manager';
 

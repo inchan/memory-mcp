@@ -5,6 +5,38 @@
 import type { MarkdownNote } from '@memory-mcp/common';
 
 /**
+ * Git 스냅샷 모드
+ */
+export type GitSnapshotMode = 'disabled' | 'commit' | 'tag';
+
+/**
+ * Git 스냅샷 옵션
+ */
+export interface GitSnapshotOptions {
+  repositoryPath?: string;
+  mode?: GitSnapshotMode;
+  commitMessageTemplate?: string;
+  tagTemplate?: string;
+  retries?: number;
+  gitBinary?: string;
+  metricsCollector?: (result: GitSnapshotResult) => void;
+}
+
+/**
+ * Git 스냅샷 결과 메트릭
+ */
+export interface GitSnapshotResult {
+  mode: GitSnapshotMode;
+  success: boolean;
+  changedFiles: string[];
+  durationMs: number;
+  commitSha?: string;
+  tagName?: string;
+  errorCode?: string;
+  message?: string;
+}
+
+/**
  * 파일 감시 이벤트 타입
  */
 export type FileWatchEvent = 'add' | 'change' | 'unlink';
@@ -46,6 +78,11 @@ export interface VaultWatchOptions {
    * 재귀적 감시 여부 (기본: true)
    */
   recursive?: boolean;
+
+  /**
+   * Git 스냅샷 옵션
+   */
+  gitSnapshot?: GitSnapshotOptions;
 }
 
 /**

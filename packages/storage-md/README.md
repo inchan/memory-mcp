@@ -35,6 +35,8 @@ Markdown 파일 저장/로드와 Front Matter 처리를 위한 패키지입니�
 npm install @memory-mcp/storage-md
 ```
 
+Git 스냅샷 옵션을 활성화하면 배치로 감지된 변경 사항을 자동으로 커밋합니다. 실패 시에는 인덱스 상태를 원복하고, 커밋/태그 이름은 템플릿을 통해 `{count}`, `{timestamp}`, `{mode}` 등의 플레이스홀더를 사용해 구성할 수 있습니다.
+
 ## 🚀 사용법
 
 ### 기본 노트 관리
@@ -133,6 +135,25 @@ await watcher.start();
 
 // 감시 중지
 await watcher.stop();
+```
+
+### Git 스냅샷 연동
+
+```typescript
+import { BatchFileWatcher } from '@memory-mcp/storage-md';
+
+const watcher = new BatchFileWatcher('/vault', 1000, {
+  gitSnapshot: {
+    mode: 'commit',
+    commitMessageTemplate: 'chore(snapshot): {count} files @ {timestamp}',
+  },
+});
+
+watcher.onBatchChange((changes) => {
+  console.log(`배치 변경 감지: ${changes.length}건`);
+});
+
+await watcher.start();
 ```
 
 ### 백링크 자동 관리

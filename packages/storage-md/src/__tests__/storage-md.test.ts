@@ -8,11 +8,16 @@ import {
   createNewNote,
   parseFrontMatter,
   createVaultWatcher,
-  PACKAGE_VERSION
+  PACKAGE_VERSION,
+  GitSnapshotManager
 } from '../index';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { promises as fs } from 'fs';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
+
+const execFileAsync = promisify(execFile);
 
 describe('Storage-md Package', () => {
   const testDir = join(tmpdir(), 'storage-md-test', Date.now().toString());
@@ -126,6 +131,110 @@ Content here`;
     const result = parseFrontMatter(invalidContent, 'test.md', false);
     expect(result.frontMatter.title).toBe('Untitled');
     expect(result.frontMatter.category).toBe('Resources');
+  });
+});
+
+describe('GitSnapshotManager', () => {
+  const testRoot = join(tmpdir(), 'storage-md-git', Date.now().toString());
+  let repoDir: string;
+
+  beforeEach(async () => {
+    repoDir = join(testRoot, `repo-${Date.now()}`);
+    await fs.mkdir(repoDir, { recursive: true });
+    await execFileAsync('git', ['init'], { cwd: repoDir });
+    await execFileAsync('git', ['config', 'user.email', 'test@example.com'], { cwd: repoDir });
+    await execFileAsync('git', ['config', 'user.name', 'Test User'], { cwd: repoDir });
+  });
+
+  afterAll(async () => {
+    try {
+      await fs.rm(testRoot, { recursive: true, force: true });
+    } catch {
+      // ignore cleanup errors
+    }
+  });
+
+  test('파일 변경을 스냅샷 커밋으로 기록', async () => {
+    const manager = new GitSnapshotManager(repoDir, {
+      mode: 'commit',
+      commitMessageTemplate: 'snapshot: {count} files'
+    });
+
+    await manager.initialize();
+
+    const filePath = join(repoDir, 'Projects', 'note.md');
+    await fs.mkdir(join(repoDir, 'Projects'), { recursive: true });
+    await fs.writeFile(filePath, '# Hello world');
+
+    const result = await manager.createSnapshot([
+      {
+        type: 'add',
+        filePath,
+      }
+    ]);
+
+    expect(result?.success).toBe(true);
+    expect(result?.mode).toBe('commit');
+    expect(result?.changedFiles).toContain('Projects/note.md');
+
+    const log = await execFileAsync('git', ['log', '-1', '--pretty=%B'], { cwd: repoDir });
+    expect(log.stdout.trim()).toBe('snapshot: 1 files');
+
+    const status = await execFileAsync('git', ['status', '--porcelain'], { cwd: repoDir });
+    expect(status.stdout.trim()).toBe('');
+  });
+
+  test('파일 삭제를 스냅샷에 포함', async () => {
+    const filePath = join(repoDir, 'note.md');
+    await fs.writeFile(filePath, '# Temp');
+    await execFileAsync('git', ['add', 'note.md'], { cwd: repoDir });
+    await execFileAsync('git', ['commit', '-m', 'initial'], { cwd: repoDir });
+
+    const manager = new GitSnapshotManager(repoDir, {
+      mode: 'commit',
+    });
+    await manager.initialize();
+
+    await fs.unlink(filePath);
+
+    const result = await manager.createSnapshot([
+      {
+        type: 'unlink',
+        filePath,
+      }
+    ]);
+
+    expect(result?.success).toBe(true);
+    expect(result?.changedFiles).toContain('note.md');
+
+    const status = await execFileAsync('git', ['status', '--porcelain'], { cwd: repoDir });
+    expect(status.stdout.trim()).toBe('');
+  });
+
+  test('비활성화 모드에서는 커밋하지 않음', async () => {
+    const manager = new GitSnapshotManager(repoDir, {
+      mode: 'disabled'
+    });
+    await manager.initialize();
+
+    const filePath = join(repoDir, 'note.md');
+    await fs.writeFile(filePath, '# No snapshot');
+
+    const result = await manager.createSnapshot([
+      {
+        type: 'change',
+        filePath,
+      }
+    ]);
+
+    expect(result).toBeNull();
+
+    const status = await execFileAsync('git', ['status', '--porcelain'], { cwd: repoDir });
+    expect(status.stdout).toContain('?? note.md');
+
+    await expect(
+      execFileAsync('git', ['rev-parse', '--verify', 'HEAD'], { cwd: repoDir })
+    ).rejects.toHaveProperty('code');
   });
 });
 

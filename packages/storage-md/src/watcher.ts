@@ -15,6 +15,7 @@ import {
   FileWatchHandler,
   StorageMdError
 } from './types';
+import { GitSnapshotManager } from './git-snapshot';
 
 /**
  * 볼트 파일 감시자 클래스
@@ -22,7 +23,7 @@ import {
 export class VaultWatcher extends EventEmitter {
   private watcher: chokidar.FSWatcher | null = null;
   private vaultPath: string;
-  private options: Required<VaultWatchOptions>;
+  private options: Required<Omit<VaultWatchOptions, 'gitSnapshot'>> & Pick<VaultWatchOptions, 'gitSnapshot'>;
   private isWatching: boolean = false;
   private debouncedHandlers: Map<string, Function> = new Map();
 
@@ -41,6 +42,7 @@ export class VaultWatcher extends EventEmitter {
       ],
       debounceMs: options.debounceMs || 300,
       recursive: options.recursive !== false,
+      gitSnapshot: options.gitSnapshot,
     };
 
     logger.debug('VaultWatcher 생성', {
@@ -345,6 +347,7 @@ export class BatchFileWatcher {
   private batchTimeout: NodeJS.Timeout | null = null;
   private pendingChanges: Map<string, FileWatchEventData> = new Map();
   private batchDelay: number;
+  private gitSnapshotManager?: GitSnapshotManager;
 
   constructor(
     vaultPath: string,
@@ -353,6 +356,13 @@ export class BatchFileWatcher {
   ) {
     this.batchDelay = batchDelay;
     this.watcher = createVaultWatcher(vaultPath, options);
+
+    if (options?.gitSnapshot) {
+      this.gitSnapshotManager = new GitSnapshotManager(
+        options.gitSnapshot.repositoryPath ?? vaultPath,
+        options.gitSnapshot
+      );
+    }
 
     this.watcher.onFileChange((eventData) => {
       this.addToBatch(eventData);
@@ -372,14 +382,14 @@ export class BatchFileWatcher {
 
     // 새 타이머 설정
     this.batchTimeout = setTimeout(() => {
-      this.processBatch();
+      void this.processBatch();
     }, this.batchDelay);
   }
 
   /**
    * 배치 처리
    */
-  private processBatch(): void {
+  private async processBatch(): Promise<void> {
     if (this.pendingChanges.size === 0) {
       return;
     }
@@ -391,12 +401,28 @@ export class BatchFileWatcher {
     logger.debug(`배치 파일 변경 처리: ${changes.length}개 파일`);
 
     this.watcher.emit('batchChange', changes);
+
+    if (this.gitSnapshotManager) {
+      try {
+        await this.gitSnapshotManager.createSnapshot(changes);
+      } catch (error) {
+        logger.error('Git 스냅샷 처리 실패', error);
+        const err = error instanceof Error
+          ? error
+          : new StorageMdError('Git 스냅샷 처리 실패', 'GIT_SNAPSHOT_ERROR', undefined, error);
+        this.watcher.emit('error', err);
+      }
+    }
   }
 
   /**
    * 감시 시작
    */
   async start(): Promise<void> {
+    if (this.gitSnapshotManager) {
+      await this.gitSnapshotManager.initialize();
+    }
+
     await this.watcher.start();
   }
 
