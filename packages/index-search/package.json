@@ -1,0 +1,29 @@
+{
+  "name": "@memory-mcp/index-search",
+  "version": "0.1.0",
+  "description": "FTS/그래프 인덱싱 & 검색",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@memory-mcp/common": "^0.1.0",
+    "better-sqlite3": "^9.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/better-sqlite3": "^7.6.8"
+  },
+  "keywords": [
+    "memory-mcp",
+    "search",
+    "index",
+    "sqlite",
+    "fts5"
+  ]
+}

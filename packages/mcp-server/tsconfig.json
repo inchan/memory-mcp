@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["dist", "__tests__", "node_modules"],
+  "references": [
+    { "path": "../common" },
+    { "path": "../storage-md" },
+    { "path": "../index-search" },
+    { "path": "../assoc-engine" }
+  ]
+}

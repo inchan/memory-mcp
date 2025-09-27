@@ -1,0 +1,32 @@
+{
+  "name": "@memory-mcp/storage-md",
+  "version": "0.1.0",
+  "description": "Markdown 파일 저장/로드와 Front Matter 처리",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@memory-mcp/common": "^0.1.0",
+    "gray-matter": "^4.0.3",
+    "remark": "^14.0.3",
+    "chokidar": "^3.5.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "@types/jest": "^29.5.8"
+  },
+  "keywords": [
+    "memory-mcp",
+    "storage",
+    "markdown",
+    "front-matter"
+  ]
+}

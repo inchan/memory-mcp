@@ -1,0 +1,26 @@
+{
+  "name": "@memory-mcp/common",
+  "version": "0.1.0",
+  "description": "공통 스키마, 타입, 유틸리티 함수들",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0"
+  },
+  "keywords": [
+    "memory-mcp",
+    "common",
+    "schemas",
+    "types"
+  ]
+}
