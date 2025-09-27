@@ -7,7 +7,6 @@ import type {
   FileWatchEventData,
   GitSnapshotOptions,
   GitSnapshotResult,
-  GitSnapshotMode,
 } from './types';
 import { StorageMdError } from './types';
 
@@ -26,15 +25,18 @@ export class GitSnapshotManager {
 
   constructor(repositoryPath: string, options: GitSnapshotOptions = {}) {
     this.repositoryPath = repositoryPath;
-    this.options = {
+    const defaults = {
       repositoryPath: options.repositoryPath ?? repositoryPath,
-      mode: options.mode ?? 'commit',
+      mode: options.mode ?? ('commit' as const),
       commitMessageTemplate: options.commitMessageTemplate ?? 'chore(snapshot): {count} files updated @ {timestamp}',
       tagTemplate: options.tagTemplate ?? 'snapshot-{timestamp}',
       retries: options.retries ?? 2,
       gitBinary: options.gitBinary ?? 'git',
-      metricsCollector: options.metricsCollector,
     };
+    
+    this.options = options.metricsCollector 
+      ? { ...defaults, metricsCollector: options.metricsCollector }
+      : defaults;
   }
 
   /**

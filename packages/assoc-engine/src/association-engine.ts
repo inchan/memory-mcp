@@ -6,6 +6,7 @@ import type {
   SearchEngineAdapter,
 } from "./types.js";
 import type { SearchResult } from "@memory-mcp/common";
+import type { SearchOptions } from '@memory-mcp/index-search';
 
 const DEFAULT_CONFIG: Required<AssociationEngineConfig> = {
   defaultLimit: 5,
@@ -75,14 +76,19 @@ export class AssociationEngine {
     }
     const start = Date.now();
 
-    const limit = parsed.limit ?? this.config.defaultLimit;
-    const candidateLimit = Math.max(limit * 3, this.config.maxCandidates);
+    const limit = parsed.limit ?? this.config.defaultLimit ?? 10;
+    const candidateLimit = Math.max(limit * 3, this.config.maxCandidates ?? 30);
+
+    const searchOptions: SearchOptions = {
+      limit: candidateLimit,
+    };
+    
+    if (parsed.tags && parsed.tags.length > 0) {
+      searchOptions.tags = parsed.tags;
+    }
 
     const result = await withTimeout(
-      this.searchEngine.search(parsed.query, {
-        limit: candidateLimit,
-        tags: parsed.tags,
-      }),
+      this.searchEngine.search(parsed.query, searchOptions),
       this.config.timeoutMs,
       "AssociationEngine search timeout"
     );
@@ -106,10 +112,10 @@ export class AssociationEngine {
         const tagScore = this.computeTagScore(candidate.tags ?? [], contextTags);
         const contextScore = contextWeights.get(candidate.id) ?? 0;
         const finalScore =
-          normalizedScore * this.config.scoring.baseWeight +
-          clamp(linkScore) * this.config.scoring.linkWeight +
-          clamp(tagScore) * this.config.scoring.tagWeight +
-          clamp(contextScore) * this.config.scoring.contextWeight;
+          normalizedScore * (this.config.scoring?.baseWeight ?? 0.4) +
+          clamp(linkScore) * (this.config.scoring?.linkWeight ?? 0.3) +
+          clamp(tagScore) * (this.config.scoring?.tagWeight ?? 0.2) +
+          clamp(contextScore) * (this.config.scoring?.contextWeight ?? 0.1);
 
         const reasons: string[] = [`검색 점수 ${(normalizedScore * 100).toFixed(0)}점`];
         if (linkScore > 0) {

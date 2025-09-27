@@ -2,10 +2,10 @@ import type {
   BacklinkOptions,
   ConnectedNotesOptions,
   EnhancedSearchResult,
-  LinkGraphNode,
   LinkRelation,
   SearchOptions,
 } from "@memory-mcp/index-search";
+import type { LinkGraphNode } from '@memory-mcp/common';
 
 export interface SearchEngineAdapter {
   search(query: string, options?: SearchOptions): Promise<EnhancedSearchResult>;
@@ -72,11 +72,11 @@ export interface SessionFocusNote {
   weight: number;
   tags: string[];
   lastUpdated: number;
-  title?: string;
-  category?: string;
-  filePath?: string;
-  snippet?: string;
-  reasons?: string[];
+  title: string;
+  category: string;
+  filePath: string;
+  snippet: string;
+  reasons: string[];
 }
 
 export interface SessionQueryEntry {

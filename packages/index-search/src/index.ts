@@ -9,4 +9,7 @@ export * from './fts-index';
 export * from './link-graph';
 export * from './search-engine';
 
+// Re-export common types for convenience
+export type { LinkGraphNode } from '@memory-mcp/common';
+
 export const PACKAGE_VERSION = '0.1.0';

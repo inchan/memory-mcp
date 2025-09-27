@@ -5,7 +5,7 @@
 import path from 'path';
 import { EventEmitter } from 'events';
 import { logger } from '@memory-mcp/common';
-import type { MarkdownNote, FrontMatter } from '@memory-mcp/common';
+import type { MarkdownNote } from '@memory-mcp/common';
 import {
   ensureDirectory,
   directoryExists,

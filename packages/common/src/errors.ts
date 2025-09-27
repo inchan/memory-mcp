@@ -92,7 +92,7 @@ export class FileSystemError extends MemoryMcpError {
     };
     super(code, message, mergedMetadata);
     this.name = 'FileSystemError';
-    this.filePath = filePath;
+    this.filePath = filePath ?? undefined;
     Object.setPrototypeOf(this, FileSystemError.prototype);
   }
 }
@@ -117,7 +117,7 @@ export class ValidationError extends MemoryMcpError {
     };
     super(ErrorCode.SCHEMA_VALIDATION_ERROR, message, mergedMetadata);
     this.name = 'ValidationError';
-    this.field = field;
+    this.field = field ?? undefined;
     this.value = value;
     Object.setPrototypeOf(this, ValidationError.prototype);
   }
@@ -155,7 +155,7 @@ export class ProtocolError extends MemoryMcpError {
     };
     super(code, message, mergedMetadata);
     this.name = 'ProtocolError';
-    this.protocolCode = protocolCode;
+    this.protocolCode = protocolCode ?? undefined;
     Object.setPrototypeOf(this, ProtocolError.prototype);
   }
 }
@@ -224,9 +224,9 @@ export function formatError(error: unknown): string {
  */
 export const createFileNotFoundError = (filePath: string): FileSystemError =>
   new FileSystemError(
-    ErrorCode.FILE_NOT_FOUND,
     `파일을 찾을 수 없습니다: ${filePath}`,
-    filePath
+    filePath,
+    ErrorCode.FILE_NOT_FOUND
   );
 
 export const createValidationError = (

@@ -31,7 +31,7 @@ export class VaultWatcher extends EventEmitter {
     super();
 
     this.vaultPath = normalizePath(vaultPath);
-    this.options = {
+    const defaults = {
       pattern: options.pattern || '**/*.md',
       ignored: options.ignored || [
         '**/node_modules/**',
@@ -42,8 +42,11 @@ export class VaultWatcher extends EventEmitter {
       ],
       debounceMs: options.debounceMs || 300,
       recursive: options.recursive !== false,
-      gitSnapshot: options.gitSnapshot,
     };
+    
+    this.options = options.gitSnapshot 
+      ? { ...defaults, gitSnapshot: options.gitSnapshot }
+      : defaults;
 
     logger.debug('VaultWatcher 생성', {
       vaultPath: this.vaultPath,

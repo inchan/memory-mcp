@@ -10,7 +10,7 @@ import { VaultWatcher } from './watcher';
 import { FileWatchEventData } from './types';
 import { loadNote, saveNote, findNoteByUid, analyzeLinks } from './note-manager';
 import { updateFrontMatter } from './front-matter';
-import { StorageMdError, BacklinkInfo } from './types';
+import { StorageMdError } from './types';
 import { debounce } from '@memory-mcp/common';
 
 /**
@@ -95,7 +95,7 @@ export class BacklinkManager extends EventEmitter {
       logger.debug(`BacklinkManager 초기화 시작: ${this.vaultPath}`);
 
       if (this.options.autoSync) {
-        this.watcher = watcher;
+        this.watcher = watcher ?? null;
 
         if (this.watcher) {
           // 파일 변경 이벤트 리스너 등록
@@ -285,7 +285,7 @@ export class BacklinkManager extends EventEmitter {
       logger.info(`전체 백링크 재빌드 시작: ${this.vaultPath}`);
 
       // 모든 노트 로드 (간단한 스캔)
-      const { listFiles } = await import('./file-operations');
+      const { listFiles } = await import('./file-operations.js');
       const markdownFiles = await listFiles(this.vaultPath, /\.md$/i, true);
 
       logger.debug(`${markdownFiles.length}개 파일 발견`);
@@ -332,7 +332,7 @@ export class BacklinkManager extends EventEmitter {
       logger.debug(`삭제된 노트의 백링크 정리: ${deletedUid}`);
 
       // 모든 노트에서 삭제된 UID로의 링크 제거
-      const { listFiles } = await import('./file-operations');
+      const { listFiles } = await import('./file-operations.js');
       const markdownFiles = await listFiles(this.vaultPath, /\.md$/i, true);
 
       const affectedNotes: Uid[] = [];

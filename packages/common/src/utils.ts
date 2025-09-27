@@ -141,7 +141,7 @@ function maskEmailAddress(email: string): string {
     return '***@***.***';
   }
 
-  const normalizedLocal = localPart.toLowerCase();
+  const normalizedLocal = localPart?.toLowerCase() || '';
 
   if (!ROLE_BASED_LOCAL_PARTS.has(normalizedLocal)) {
     return '***@***.***';

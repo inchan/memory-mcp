@@ -61,17 +61,20 @@ export class SessionContextManager {
         const weight =
           typeof note.weight === "number" ? note.weight : previous?.weight ?? 1;
         const tags = normalizeTags([...(previous?.tags ?? []), ...(note.tags ?? [])]);
-        updatedNotes.push({
+        
+        const updatedNote: SessionFocusNote = {
           id: note.id,
           weight,
           tags,
           lastUpdated: now,
-          title: note.title ?? previous?.title,
-          category: note.category ?? previous?.category,
-          filePath: note.filePath ?? previous?.filePath,
-          snippet: note.snippet ?? previous?.snippet,
-          reasons: note.reasons ?? previous?.reasons,
-        });
+          title: note.title ?? previous?.title ?? '',
+          category: note.category ?? previous?.category ?? '',
+          filePath: note.filePath ?? previous?.filePath ?? '',
+          snippet: note.snippet ?? previous?.snippet ?? '',
+          reasons: note.reasons ?? previous?.reasons ?? [],
+        };
+        
+        updatedNotes.push(updatedNote);
         existing.delete(note.id);
       }
 
