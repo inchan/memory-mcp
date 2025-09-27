@@ -1,4 +1,9 @@
 import { ParaCategorySchema } from "@memory-mcp/common";
+import {
+  AssociationRequestSchema,
+  SessionContextCommandSchema,
+  ReflectionToolRequestSchema,
+} from "@memory-mcp/assoc-engine";
 import { z } from "zod";
 
 export const SearchMemoryInputSchema = z
@@ -63,6 +68,18 @@ export const CreateNoteInputSchema = z
 
 export type CreateNoteInput = z.infer<typeof CreateNoteInputSchema>;
 
-export const ToolNameSchema = z.enum(["search_memory", "create_note"]);
+export const ToolNameSchema = z.enum([
+  "search_memory",
+  "create_note",
+  "associate_memory",
+  "session_context",
+  "reflect_session",
+]);
 
 export type ToolName = z.infer<typeof ToolNameSchema>;
+
+export {
+  AssociationRequestSchema,
+  SessionContextCommandSchema,
+  ReflectionToolRequestSchema,
+};

@@ -46,6 +46,14 @@ npx memory-mcp --vault ~/my-vault --index ~/.memory-index.db
 # --log-level: debug, info, warn, error
 ```
 
+### Docker 실행
+```bash
+docker build -t memory-mcp .
+docker run --rm \
+  -v "$HOME/my-vault:/vault" \
+  memory-mcp --vault /vault --index /vault/.memory-index.db
+```
+
 ### Claude Desktop 연동
 ```json
 {
@@ -61,6 +69,9 @@ npx memory-mcp --vault ~/my-vault --index ~/.memory-index.db
 ### 사용 가능한 MCP 툴
 - **`search_memory`**: 하이브리드 검색 (키워드, 카테고리, 태그 필터)
 - **`create_note`**: 노트 생성 + 자동 인덱싱 + 백링크 업데이트
+- **`associate_memory`**: 세션 문맥 기반 연관 추천 + 링크/태그 가중치 결합
+- **`session_context`**: 세션 포커스 노트/태그 상태 조회 및 갱신
+- **`reflect_session`**: 최근 활동 요약과 중복/충돌 정리 리포트
 
 ### 사용 예시 (Claude에서)
 ```
@@ -79,12 +90,12 @@ packages/
 ├── mcp-server/           ✅ MCP 프로토콜 서버 + CLI
 ├── storage-md/           ✅ 파일 관리 + 백링크 + PARA 구조
 ├── index-search/         ✅ FTS + 링크 그래프 하이브리드 검색
-├── assoc-engine/         🔄 Olima 연상 엔진 (기본 구조)
+├── assoc-engine/         ✅ Olima 연상 엔진 (추천/세션/리플렉션)
 └── common/               ✅ 공통 타입 + 유틸리티
 
 docs/
 ├── ARCHITECTURE.md       📚 시스템 설계 및 데이터 플로우
-├── ROADMAP.md           📊 개발 진행 상황 (80% 완료)
+├── ROADMAP.md           📊 개발 진행 상황 (90% 완료)
 └── specs/               📋 상세 스펙 및 작업 관리
 ```
 
@@ -97,21 +108,24 @@ docs/
 
 ## 📊 현재 상태
 
-### ✅ 완전 구현 (80%)
+### ✅ 완전 구현 (90%)
 - **MCP 서버 코어**: 프로토콜, CLI, 툴 레지스트리
 - **저장소 관리**: 원자적 쓰기, 감시, 백링크, PARA
 - **검색 엔진**: FTS + 링크 그래프 하이브리드
+- **Olima 연상 엔진**: 세션 연관 추천, 컨텍스트 관리, 리플렉션 요약
 - **Zettelkasten**: 백링크 관리, 고아 노트 탐지
+- **Docker 배포**: 경량 Alpine 이미지 + `/vault` 볼륨 마운트
 
-### 🔄 개발 중 (20%)
-- **연상 엔진**: 고급 문맥 기반 추천
-- **배포 최적화**: Docker, CI/CD
+### 🔄 개발 중 (10%)
+- **배포 최적화**: CI/CD 파이프라인, 보안 스캔 자동화
 
 ### 🎯 주요 성과
 - **실제 동작**: Claude에서 즉시 사용 가능
 - **성능**: SQLite FTS5 + WAL 모드로 고속 검색
 - **안정성**: 원자적 쓰기 + 재시도로 데이터 보호
 - **확장성**: 모듈화된 패키지로 유지보수 용이
+- **Olima 연상 엔진**: 세션 추천/컨텍스트/리플렉션 도구와 테스트 커버리지 확보
+- **Docker 지원**: 경량 이미지 + 비루트 사용자 + `/vault` 볼륨으로 손쉬운 배포
 
 ## 📚 문서 및 개발
 
