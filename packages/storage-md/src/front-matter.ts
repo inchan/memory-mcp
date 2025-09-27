@@ -67,6 +67,11 @@ export function parseFrontMatter(
   try {
     // gray-matter로 파싱
     const parsed = matter(fileContent);
+    const contentBody = parsed.content.startsWith('\r\n')
+      ? parsed.content.slice(2)
+      : parsed.content.startsWith('\n')
+      ? parsed.content.slice(1)
+      : parsed.content;
 
     // Front Matter가 비어있는 경우
     if (!parsed.data || Object.keys(parsed.data).length === 0) {
@@ -81,7 +86,7 @@ export function parseFrontMatter(
 
       return {
         frontMatter: createDefaultFrontMatter('Untitled') as FrontMatter,
-        content: parsed.content,
+        content: contentBody,
         isEmpty: true,
       };
     }
@@ -114,21 +119,21 @@ export function parseFrontMatter(
         // 여전히 실패하면 완전히 기본값 사용
         return {
           frontMatter: createDefaultFrontMatter('Untitled') as FrontMatter,
-          content: parsed.content,
+          content: contentBody,
           isEmpty: false,
         };
       }
 
       return {
         frontMatter: finalValidation.data,
-        content: parsed.content,
+        content: contentBody,
         isEmpty: false,
       };
     }
 
     return {
       frontMatter: validationResult.data,
-      content: parsed.content,
+      content: contentBody,
       isEmpty: false,
     };
 
