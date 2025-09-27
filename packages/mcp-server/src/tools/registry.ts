@@ -1,8 +1,8 @@
 import {
   ErrorCode,
   MemoryMcpError,
-  createLogEntry,
   maskSensitiveInfo,
+  type LogLevel,
 } from "@memory-mcp/common";
 import {
   createNewNote,
@@ -34,6 +34,25 @@ import {
 } from "./execution-policy.js";
 
 type JsonSchema = ReturnType<typeof zodToJsonSchema>;
+
+function logToolEvent(
+  context: ToolExecutionContext,
+  level: LogLevel,
+  tool: ToolName,
+  message: string,
+  metadata?: Record<string, unknown>,
+  event?: string
+): void {
+  const payload = event
+    ? { event, ...(metadata ?? {}) }
+    : metadata;
+
+  if (payload && Object.keys(payload).length > 0) {
+    context.logger[level](`[tool:${tool}] ${message}`, payload);
+  } else {
+    context.logger[level](`[tool:${tool}] ${message}`);
+  }
+}
 
 // 검색 엔진 인스턴스 캐시 (indexPath 기준)
 const searchEngineCache = new Map<string, SearchEngine>();
@@ -97,15 +116,21 @@ const searchMemoryDefinition: ToolDefinition<typeof SearchMemoryInputSchema> = {
   schema: SearchMemoryInputSchema,
   async handler(input: SearchMemoryInput, context: ToolExecutionContext): Promise<ToolResult> {
     const { query, limit = 10, category, tags = [] } = input;
+    const maskedQuery = maskSensitiveInfo(query);
+    const normalizedTags = tags.length > 0 ? tags : undefined;
 
-    context.logger.info(
-      `[tool:search_memory] 검색 요청 수신`,
-      createLogEntry("info", "search_memory", {
-        query: maskSensitiveInfo(query),
+    logToolEvent(
+      context,
+      "info",
+      "search_memory",
+      "검색 요청 수신",
+      {
+        query: maskedQuery,
         limit,
         category: category ?? null,
-        tags,
-      })
+        tags: normalizedTags ?? [],
+      },
+      "search_memory"
     );
 
     try {
@@ -116,22 +141,26 @@ const searchMemoryDefinition: ToolDefinition<typeof SearchMemoryInputSchema> = {
         limit,
         offset: 0,
         category,
-        tags: tags.length > 0 ? tags : undefined,
+        tags: normalizedTags,
         snippetLength: 200,
-        highlightTag: 'mark'
+        highlightTag: "mark",
       };
 
       // 하이브리드 검색 실행
       const searchResult = await searchEngine.search(query, searchOptions);
 
-      context.logger.info(
-        `[tool:search_memory] 검색 완료`,
-        createLogEntry("info", "search_memory.success", {
-          query: maskSensitiveInfo(query),
+      logToolEvent(
+        context,
+        "info",
+        "search_memory",
+        "검색 완료",
+        {
+          query: maskedQuery,
           resultsCount: searchResult.results.length,
           totalCount: searchResult.totalCount,
           timeMs: searchResult.metrics.totalTimeMs,
-        })
+        },
+        "search_memory.success"
       );
 
       // 검색 결과가 없는 경우
@@ -216,12 +245,16 @@ const searchMemoryDefinition: ToolDefinition<typeof SearchMemoryInputSchema> = {
       };
 
     } catch (error) {
-      context.logger.error(
-        `[tool:search_memory] 검색 실패`,
-        createLogEntry("error", "search_memory.failure", {
-          query: maskSensitiveInfo(query),
+      logToolEvent(
+        context,
+        "error",
+        "search_memory",
+        "검색 실패",
+        {
+          query: maskedQuery,
           error: error instanceof Error ? error.message : String(error),
-        })
+        },
+        "search_memory.failure"
       );
 
       throw new MemoryMcpError(
@@ -240,13 +273,17 @@ const createNoteDefinition: ToolDefinition<typeof CreateNoteInputSchema> = {
   async handler(input: CreateNoteInput, context: ToolExecutionContext): Promise<ToolResult> {
     const maskedContent = maskSensitiveInfo(input.content);
 
-    context.logger.info(
-      `[tool:create_note] 노트 생성 요청 수신`,
-      createLogEntry("info", "create_note", {
+    logToolEvent(
+      context,
+      "info",
+      "create_note",
+      "노트 생성 요청 수신",
+      {
         vaultPath: context.vaultPath,
         mode: context.mode,
         title: input.title,
-      })
+      },
+      "create_note"
     );
 
     try {
@@ -280,31 +317,46 @@ const createNoteDefinition: ToolDefinition<typeof CreateNoteInputSchema> = {
         const searchEngine = getSearchEngine(context);
         await searchEngine.indexNote(note);
 
-        context.logger.debug(
-          `[tool:create_note] 검색 인덱스 업데이트 완료`,
-          createLogEntry("debug", "create_note.index", {
+        logToolEvent(
+          context,
+          "debug",
+          "create_note",
+          "검색 인덱스 업데이트 완료",
+          {
             id: note.frontMatter.id,
-          })
+          },
+          "create_note.index"
         );
       } catch (indexError) {
         // 인덱스 실패는 경고만 기록하고 계속 진행
-        context.logger.warn(
-          `[tool:create_note] 검색 인덱스 업데이트 실패`,
-          createLogEntry("warn", "create_note.index_failure", {
+        logToolEvent(
+          context,
+          "warn",
+          "create_note",
+          "검색 인덱스 업데이트 실패",
+          {
             id: note.frontMatter.id,
-            error: indexError instanceof Error ? indexError.message : String(indexError),
-          })
+            error:
+              indexError instanceof Error
+                ? indexError.message
+                : String(indexError),
+          },
+          "create_note.index_failure"
         );
       }
 
       const noteId = note.frontMatter.id;
 
-      context.logger.info(
-        `[tool:create_note] 노트 생성 완료: ${noteId}`,
-        createLogEntry("info", "create_note.success", {
+      logToolEvent(
+        context,
+        "info",
+        "create_note",
+        `노트 생성 완료: ${noteId}`,
+        {
           id: noteId,
           filePath: note.filePath,
-        })
+        },
+        "create_note.success"
       );
 
       return {
@@ -331,12 +383,16 @@ const createNoteDefinition: ToolDefinition<typeof CreateNoteInputSchema> = {
         },
       };
     } catch (error) {
-      context.logger.error(
-        `[tool:create_note] 노트 생성 실패`,
-        createLogEntry("error", "create_note.failure", {
+      logToolEvent(
+        context,
+        "error",
+        "create_note",
+        "노트 생성 실패",
+        {
           title: input.title,
           error: error instanceof Error ? error.message : String(error),
-        })
+        },
+        "create_note.failure"
       );
 
       throw new MemoryMcpError(
@@ -393,12 +449,16 @@ async function executeToolWithDefinition(
   });
 
   const startTime = Date.now();
-  context.logger.debug(
-    `[tool:${definition.name}] 실행 시작`,
-    createLogEntry("debug", "tool.start", {
+  logToolEvent(
+    context,
+    "debug",
+    definition.name,
+    "실행 시작",
+    {
       name: definition.name,
       inputPreview: maskSensitiveInfo(JSON.stringify(parsedInput)).slice(0, 200),
-    })
+    },
+    "tool.start"
   );
 
   try {
@@ -407,37 +467,49 @@ async function executeToolWithDefinition(
       {
         ...policy,
         onRetry: ({ attempt, error }) => {
-          context.logger.warn(
-            `[tool:${definition.name}] ${attempt}차 시도 실패`,
-            createLogEntry("warn", "tool.retry", {
+          logToolEvent(
+            context,
+            "warn",
+            definition.name,
+            `${attempt}차 시도 실패`,
+            {
               attempt,
               error: error instanceof Error ? error.message : String(error),
               name: definition.name,
-            })
+            },
+            "tool.retry"
           );
         },
       }
     );
 
     const duration = Date.now() - startTime;
-    context.logger.info(
-      `[tool:${definition.name}] 실행 완료 (${duration}ms)`,
-      createLogEntry("info", "tool.success", {
+    logToolEvent(
+      context,
+      "info",
+      definition.name,
+      `실행 완료 (${duration}ms)`,
+      {
         duration,
         name: definition.name,
-      })
+      },
+      "tool.success"
     );
 
     return result;
   } catch (error) {
     const duration = Date.now() - startTime;
-    context.logger.error(
-      `[tool:${definition.name}] 실행 실패 (${duration}ms)`,
-      createLogEntry("error", "tool.failure", {
+    logToolEvent(
+      context,
+      "error",
+      definition.name,
+      `실행 실패 (${duration}ms)`,
+      {
         duration,
         name: definition.name,
         error: error instanceof Error ? error.message : String(error),
-      })
+      },
+      "tool.failure"
     );
 
     throw error;

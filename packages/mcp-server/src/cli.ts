@@ -8,15 +8,11 @@
 import { Command } from "commander";
 import { logger } from "@memory-mcp/common";
 import { startServer, type MemoryMcpServerOptions } from "./server.js";
+import { PACKAGE_VERSION } from "./version.js";
 import * as fs from "fs/promises";
 import * as path from "path";
 
 const program = new Command();
-
-/**
- * CLI 버전 정보
- */
-const PACKAGE_VERSION = "0.1.0";
 
 function parseInteger(value: string, defaultValue: number): number {
   const parsed = Number.parseInt(value, 10);
