@@ -265,3 +265,18 @@ export class IndexSearchEngine {
       .digest('hex');
   }
 }
+
+export function createDefaultSearchEngine(
+  dbPath: string,
+  overrides: Partial<IndexConfig> = {}
+): IndexSearchEngine {
+  const config: IndexConfig = {
+    dbPath: normalizePath(dbPath),
+    walMode: true,
+    cacheSize: 1024,
+    pageSize: 4096,
+    ...overrides,
+  };
+
+  return new IndexSearchEngine(config);
+}

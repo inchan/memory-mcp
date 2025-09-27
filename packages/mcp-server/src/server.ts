@@ -47,7 +47,7 @@ const DEFAULT_OPTIONS: ResolvedServerOptions = {
  * MCP 서버 클래스
  * JSON-RPC 2.0 기반으로 stdin/stdout를 통해 통신
  */
-class MemoryMCPServer {
+export class MemoryMCPServer {
   private readonly server: Server;
   private readonly options: ResolvedServerOptions;
   private readonly toolContext: ToolExecutionContext;

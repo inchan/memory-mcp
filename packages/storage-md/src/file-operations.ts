@@ -8,6 +8,22 @@ import crypto from 'crypto';
 import { logger } from '@memory-mcp/common';
 import { FileSystemError, WriteFileOptions, ReadFileOptions } from './types';
 
+export interface AtomicWriteOptions {
+  encoding?: BufferEncoding;
+  createDirs?: boolean;
+}
+
+export interface ListMarkdownFilesOptions {
+  recursive?: boolean;
+  pattern?: RegExp;
+}
+
+export interface MarkdownFileEntry {
+  name: string;
+  path: string;
+  relativePath: string;
+}
+
 /**
  * 재시도 옵션
  */
@@ -258,6 +274,69 @@ export async function atomicWriteFile(
       error
     );
   }
+}
+
+export async function atomicWrite(
+  filePath: string,
+  content: string,
+  options: AtomicWriteOptions = {}
+): Promise<void> {
+  const { encoding = 'utf8', createDirs = true } = options;
+  await atomicWriteFile(filePath, content, {
+    encoding,
+    ensureDir: createDirs,
+  });
+}
+
+export async function safeRead(
+  filePath: string,
+  options: ReadFileOptions = {}
+): Promise<string> {
+  return readFile(filePath, options);
+}
+
+export async function getFileInfo(filePath: string) {
+  try {
+    const stats = await fs.stat(filePath);
+    return {
+      path: normalizePath(filePath),
+      size: stats.size,
+      isFile: stats.isFile(),
+      isDirectory: stats.isDirectory(),
+      created: new Date(stats.birthtime),
+      modified: new Date(stats.mtime),
+    };
+  } catch (error) {
+    throw new FileSystemError(
+      `파일 정보 조회 실패: ${filePath}`,
+      filePath,
+      error
+    );
+  }
+}
+
+export async function listMarkdownFiles(
+  dirPath: string,
+  options: ListMarkdownFilesOptions = {}
+): Promise<MarkdownFileEntry[]> {
+  const { recursive = false, pattern } = options;
+  const markdownPattern = /\.(md|markdown)$/i;
+  const files = await listFiles(dirPath, markdownPattern, recursive);
+  const filtered = pattern
+    ? files.filter(file => {
+        const name = path.basename(file);
+        if (pattern.global) {
+          pattern.lastIndex = 0;
+        }
+        return pattern.test(name);
+      })
+    : files;
+
+  return filtered.map(file => ({
+    name: path.basename(file),
+    path: file,
+    relativePath: normalizePath(path.relative(dirPath, file)),
+  }));
 }
 
 /**

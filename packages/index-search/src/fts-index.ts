@@ -189,29 +189,29 @@ export class FtsSearchEngine {
   private prepareSearchQuery(): Statement {
     return this.db.prepare(`
       SELECT
-        nf.uid,
-        nf.title,
-        nf.category,
-        nf.project,
-        nf.tags,
+        notes_fts.uid,
+        notes_fts.title,
+        notes_fts.category,
+        notes_fts.project,
+        notes_fts.tags,
         n.file_path,
-        bm25(nf) as score,
-        highlight(nf, 1, '<HIGHLIGHT>', '</HIGHLIGHT>') as title_highlight,
-        snippet(nf, 2, '<HIGHLIGHT>', '</HIGHLIGHT>', '...', ?) as content_snippet,
+        bm25(notes_fts) as score,
+        highlight(notes_fts, 1, '<HIGHLIGHT>', '</HIGHLIGHT>') as title_highlight,
+        snippet(notes_fts, 2, '<HIGHLIGHT>', '</HIGHLIGHT>', '...', ?) as content_snippet,
         COALESCE(GROUP_CONCAT(DISTINCT l.target_uid), '') as outgoing_links
-      FROM notes_fts nf
-      JOIN notes n ON nf.uid = n.uid
-      LEFT JOIN links l ON l.source_uid = nf.uid AND l.link_type = 'internal'
-      WHERE nf MATCH ?
-        AND (? IS NULL OR nf.category = ?)
-        AND (? IS NULL OR nf.project = ?)
+      FROM notes_fts
+      JOIN notes n ON notes_fts.uid = n.uid
+      LEFT JOIN links l ON l.source_uid = notes_fts.uid AND l.link_type = 'internal'
+      WHERE notes_fts MATCH ?
+        AND (? IS NULL OR notes_fts.category = ?)
+        AND (? IS NULL OR notes_fts.project = ?)
         AND (? = 0 OR EXISTS (
           SELECT 1 FROM (
             SELECT value FROM json_each('[' || ? || ']')
-          ) tags WHERE nf.tags LIKE '%' || tags.value || '%'
+          ) tags WHERE notes_fts.tags LIKE '%' || tags.value || '%'
         ))
-      GROUP BY nf.uid
-      ORDER BY bm25(nf)
+      GROUP BY notes_fts.uid
+      ORDER BY bm25(notes_fts)
       LIMIT ? OFFSET ?
     `);
   }
@@ -255,15 +255,15 @@ export class FtsSearchEngine {
    */
   private prepareCountQuery(): Statement {
     return this.db.prepare(`
-      SELECT COUNT(DISTINCT nf.uid) as count
-      FROM notes_fts nf
-      WHERE nf MATCH ?
-        AND (? IS NULL OR nf.category = ?)
-        AND (? IS NULL OR nf.project = ?)
+      SELECT COUNT(DISTINCT notes_fts.uid) as count
+      FROM notes_fts
+      WHERE notes_fts MATCH ?
+        AND (? IS NULL OR notes_fts.category = ?)
+        AND (? IS NULL OR notes_fts.project = ?)
         AND (? = 0 OR EXISTS (
           SELECT 1 FROM (
             SELECT value FROM json_each('[' || ? || ']')
-          ) tags WHERE nf.tags LIKE '%' || tags.value || '%'
+          ) tags WHERE notes_fts.tags LIKE '%' || tags.value || '%'
         ))
     `);
   }

@@ -9,6 +9,7 @@ Markdown 파일 저장/로드와 Front Matter 처리를 위한 패키지입니�
 - **재시도 메커니즘**: 지수 백오프로 일시적 오류 처리
 - **경로 정규화**: OS 호환성 보장
 - **안전한 파일명**: 특수문자 자동 처리
+- **편의 API**: `safeRead`, `atomicWrite`, `getFileInfo`, `listMarkdownFiles`
 
 ### 👁️ **파일 감시 (VaultWatcher)**
 - **실시간 감지**: chokidar 기반 파일 변경 감지
@@ -67,6 +68,45 @@ const loadedNote = await loadNote('/vault/Projects/new-app.md');
 
 // UID로 노트 찾기
 const foundNote = await findNoteByUid('20250927T103000Z', '/vault');
+```
+
+### 파일 유틸리티
+
+```typescript
+import {
+  safeRead,
+  atomicWrite,
+  getFileInfo,
+  listMarkdownFiles,
+  validateFrontMatter
+} from '@memory-mcp/storage-md';
+
+// 안전하게 파일 읽기
+const contents = await safeRead('/vault/Projects/design.md');
+
+// 원자적으로 파일 쓰기
+await atomicWrite('/vault/Projects/design.md', '# 새 디자인 안건', {
+  createDirs: true
+});
+
+// 파일 메타데이터 확인
+const info = await getFileInfo('/vault/Projects/design.md');
+console.log(info.size, info.created, info.modified);
+
+// 마크다운 파일 목록 조회
+const files = await listMarkdownFiles('/vault', { recursive: true });
+files.forEach(file => console.log(file.path));
+
+// Front Matter 유효성 검사
+validateFrontMatter({
+  id: '20250927T103000123456Z',
+  title: '검증용 노트',
+  category: 'Resources',
+  tags: [],
+  created: new Date().toISOString(),
+  updated: new Date().toISOString(),
+  links: []
+});
 ```
 
 ### 파일 감시 설정

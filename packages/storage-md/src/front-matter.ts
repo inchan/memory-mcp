@@ -56,6 +56,15 @@ function formatValidationErrors(error: z.ZodError): string[] {
   });
 }
 
+function stripFrontMatterBlock(content: string): string {
+  if (!content.trimStart().startsWith('---')) {
+    return content;
+  }
+
+  const frontMatterRegex = /^---\s*[\r\n]+[\s\S]*?\n---\s*[\r\n]*/;
+  return content.replace(frontMatterRegex, '').trimStart();
+}
+
 /**
  * Markdown 파일의 Front Matter 파싱
  */
@@ -64,14 +73,11 @@ export function parseFrontMatter(
   filePath?: string,
   strict: boolean = true
 ): ParseResult {
+  const hasFrontMatter = fileContent.trimStart().startsWith('---');
   try {
     // gray-matter로 파싱
     const parsed = matter(fileContent);
-    const contentBody = parsed.content.startsWith('\r\n')
-      ? parsed.content.slice(2)
-      : parsed.content.startsWith('\n')
-      ? parsed.content.slice(1)
-      : parsed.content;
+    const contentBody = parsed.content.replace(/^[\t\f\v ]*(\r?\n)+/, '');
 
     // Front Matter가 비어있는 경우
     if (!parsed.data || Object.keys(parsed.data).length === 0) {
@@ -84,10 +90,14 @@ export function parseFrontMatter(
         );
       }
 
+      const fallbackContent = hasFrontMatter
+        ? stripFrontMatterBlock(fileContent)
+        : contentBody;
+
       return {
         frontMatter: createDefaultFrontMatter('Untitled') as FrontMatter,
-        content: contentBody,
-        isEmpty: true,
+        content: fallbackContent,
+        isEmpty: !hasFrontMatter,
       };
     }
 
@@ -142,6 +152,14 @@ export function parseFrontMatter(
       throw error;
     }
 
+    if (!strict && hasFrontMatter) {
+      return {
+        frontMatter: createDefaultFrontMatter('Untitled') as FrontMatter,
+        content: stripFrontMatterBlock(fileContent),
+        isEmpty: false,
+      };
+    }
+
     throw new StorageMdError(
       `Front Matter 파싱 실패: ${error instanceof Error ? error.message : 'Unknown error'}`,
       'FRONT_MATTER_PARSE_ERROR',
@@ -154,21 +172,16 @@ export function parseFrontMatter(
 /**
  * Front Matter를 YAML 문자열로 직렬화
  */
-export function serializeFrontMatter(frontMatter: FrontMatter): string {
+export function serializeFrontMatter(
+  frontMatter: FrontMatter,
+  content: string = ''
+): string {
   try {
     // Zod 스키마로 재검증 (안전성)
     const validated = FrontMatterSchema.parse(frontMatter);
 
     // gray-matter를 사용하여 YAML로 직렬화
-    const serialized = matter.stringify('', validated);
-
-    // Front Matter 부분만 추출 (--- 포함)
-    const frontMatterMatch = serialized.match(/^---\n([\s\S]*?)\n---/);
-    if (!frontMatterMatch) {
-      throw new Error('Front Matter 직렬화 결과가 예상과 다릅니다');
-    }
-
-    return frontMatterMatch[0];
+    return matter.stringify(content, validated);
 
   } catch (error) {
     throw new StorageMdError(
@@ -193,6 +206,19 @@ export function serializeMarkdownNote(note: MarkdownNote): string {
       'MARKDOWN_SERIALIZE_ERROR',
       note.filePath,
       error
+    );
+  }
+}
+
+export function validateFrontMatter(frontMatter: FrontMatter): void {
+  const result = FrontMatterSchema.safeParse(frontMatter);
+
+  if (!result.success) {
+    const errors = formatValidationErrors(result.error);
+    throw new FrontMatterValidationError(
+      `Front Matter 검증 실패: ${errors.join(', ')}`,
+      undefined,
+      errors
     );
   }
 }

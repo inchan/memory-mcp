@@ -55,10 +55,17 @@ const validated = FrontMatterSchema.parse(frontMatter);
 - `parseMarkdownLinks()`: 마크다운 링크 파싱
 - `maskSensitiveInfo()`: 민감정보 마스킹
 - `createSnippet()`: 검색 스니펫 생성
+- `normalizePath()`: 플랫폼 독립 경로 정규화
+- `formatFileSize()`: 파일 크기 포맷팅
+- `createLogEntry()`: 구조화된 로그 엔트리 생성
 
 ### 에러 처리
 
 - `MemoryMcpError`: 기본 에러 클래스
 - `FileSystemError`: 파일 시스템 에러
 - `ValidationError`: 스키마 검증 에러
+- `ProtocolError`: MCP 프로토콜 에러
 - `IndexError`: 인덱스 관련 에러
+- `createErrorFromCode()`: 에러 코드 기반 에러 생성 헬퍼
+- `isMemoryMcpError()`: 에러 인스턴스 판별 유틸리티
+- `formatError()`: 로깅/표시용 문자열 포맷터

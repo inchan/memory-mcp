@@ -117,6 +117,7 @@ npm 패키지 배포(npx 실행), Docker 이미지, CI/CD 자동화
 - **자동 백링크 관리**: 파일 변경 시 실시간 동기화
 - **원자적 파일 쓰기**: 데이터 손실 방지
 - **PARA 구조 관리**: 자동 카테고리 분류 및 아카이브
+- **MCP 검색 툴 안정화**: `createDefaultSearchEngine` 팩토리로 search_memory 툴 즉시 사용 가능
 
 ### 🚀 즉시 사용 가능한 기능
 ```bash

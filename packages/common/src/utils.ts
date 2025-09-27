@@ -44,15 +44,23 @@ export function removeExtension(filePath: string): string {
  * Markdown 링크 파싱 ([[링크]], [텍스트](링크))
  */
 export function parseMarkdownLinks(content: string): string[] {
-  const wikiLinks = Array.from(content.matchAll(/\[\[([^\]]+)\]\]/g))
-    .map(match => match[1]?.trim())
-    .filter((link): link is string => Boolean(link));
+  const linkPattern = /\[\[([^\]]+)\]\]|\[[^\]]*\]\(([^)]+)\)/g;
+  const seen = new Set<string>();
+  const links: string[] = [];
 
-  const mdLinks = Array.from(content.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g))
-    .map(match => match[2]?.trim())
-    .filter((link): link is string => Boolean(link));
+  content.replace(linkPattern, (_match, wikiLink: string, markdownLink: string) => {
+    const rawLink = wikiLink ?? markdownLink;
+    const trimmed = rawLink?.trim();
 
-  return [...new Set([...wikiLinks, ...mdLinks])];
+    if (trimmed && !seen.has(trimmed)) {
+      seen.add(trimmed);
+      links.push(trimmed);
+    }
+
+    return _match;
+  });
+
+  return links;
 }
 
 /**
@@ -63,46 +71,103 @@ export function createSnippet(
   query: string,
   maxLength: number = 200
 ): string {
-  const queryRegex = new RegExp(query, 'gi');
-  const match = content.match(queryRegex);
-
-  if (!match) {
-    return (
-      content.slice(0, maxLength) + (content.length > maxLength ? '...' : '')
-    );
+  if (content.length <= maxLength) {
+    return content;
   }
 
-  const matchIndex = content.search(queryRegex);
-  const start = Math.max(0, matchIndex - maxLength / 2);
-  const end = Math.min(content.length, start + maxLength);
+  const lowerContent = content.toLowerCase();
+  const lowerQuery = query.toLowerCase();
+  const matchIndex = lowerContent.indexOf(lowerQuery);
 
-  let snippet = content.slice(start, end);
+  if (matchIndex === -1) {
+    const truncated = content.slice(0, maxLength);
+    return truncated + (content.length > maxLength ? '...' : '');
+  }
 
-  if (start > 0) snippet = '...' + snippet;
-  if (end < content.length) snippet = snippet + '...';
+  const snippetLength = Math.min(maxLength, content.length);
+  const queryLength = Math.max(lowerQuery.length, 1);
+  const halfWindow = Math.max(0, Math.floor((snippetLength - queryLength) / 2));
 
+  let start = Math.max(0, matchIndex - halfWindow);
+  let end = Math.min(content.length, start + snippetLength);
+
+  if (end - start < snippetLength && start > 0) {
+    start = Math.max(0, end - snippetLength);
+  }
+
+  const prefix = start > 0 ? '...' : '';
+  const suffix = end < content.length ? '...' : '';
+  const baseSnippet = content.slice(start, end);
+  const localQueryStart = matchIndex - start;
+  const localQueryEnd = localQueryStart + query.length;
+  let before = baseSnippet.slice(0, Math.max(0, localQueryStart));
+  let matchText = baseSnippet.slice(
+    Math.max(0, localQueryStart),
+    Math.min(baseSnippet.length, localQueryEnd)
+  );
+  let after = baseSnippet.slice(Math.min(baseSnippet.length, localQueryEnd));
+
+  const maxAllowed = Math.max(0, maxLength + 4 - prefix.length - suffix.length);
+
+  while (before.length + matchText.length + after.length > maxAllowed) {
+    if (after.length >= before.length && after.length > 0) {
+      after = after.slice(0, -1);
+    } else if (before.length > 0) {
+      before = before.slice(1);
+    } else {
+      break;
+    }
+  }
+
+  const snippet = `${prefix}${before.trimStart()}${matchText}${after.trimEnd()}${suffix}`;
   return snippet;
 }
 
 /**
  * 민감정보 마스킹 (이메일, 전화번호 등)
  */
+const ROLE_BASED_LOCAL_PARTS = new Set([
+  'admin',
+  'support',
+  'info',
+  'sales',
+  'contact',
+]);
+
+function maskEmailAddress(email: string): string {
+  const [localPart, domain] = email.split('@');
+
+  if (!domain) {
+    return '***@***.***';
+  }
+
+  const normalizedLocal = localPart.toLowerCase();
+
+  if (!ROLE_BASED_LOCAL_PARTS.has(normalizedLocal)) {
+    return '***@***.***';
+  }
+
+  return `${localPart}@***.***`;
+}
+
 export function maskSensitiveInfo(text: string): string {
-  return (
-    text
-      // 이메일 마스킹
-      .replace(
-        /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
-        '***@***.***'
-      )
-      // 전화번호 마스킹 (한국 형식)
-      .replace(/\b\d{2,3}-\d{3,4}-\d{4}\b/g, '***-****-****')
-      // 신용카드 번호 마스킹
-      .replace(
-        /\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g,
-        '****-****-****-****'
-      )
-  );
+  const masked = text
+    // 이메일 마스킹
+    .replace(
+      /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+      match => maskEmailAddress(match)
+    )
+    // 전화번호 마스킹 (한국 형식)
+    .replace(/\b\d{2,3}-\d{3,4}-\d{4}\b/g, '***-****-****')
+    // 신용카드 번호 마스킹
+    .replace(
+      /\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g,
+      '****-****-****-****'
+    );
+
+  return masked.replace(/,\s*(\*{3}@\*{3}\.\*{3}|[^\s]+)/g, (_match, group) => {
+    return ` ${group}`;
+  });
 }
 
 /**

@@ -58,6 +58,11 @@ export class MemoryMcpError extends Error {
     Object.setPrototypeOf(this, MemoryMcpError.prototype);
   }
 
+  override toString(): string {
+    const meta = this.metadata ? ` ${JSON.stringify(this.metadata)}` : '';
+    return `${this.name} [${this.code}]: ${this.message}${meta}`;
+  }
+
   toJSON(): Record<string, unknown> {
     return {
       name: this.name,
@@ -73,14 +78,22 @@ export class MemoryMcpError extends Error {
  * 파일 시스템 관련 에러
  */
 export class FileSystemError extends MemoryMcpError {
+  public readonly filePath?: string;
+
   constructor(
-    code: ErrorCode,
     message: string,
     filePath?: string,
+    code: ErrorCode = ErrorCode.FILE_READ_ERROR,
     metadata?: Record<string, unknown>
   ) {
-    super(code, message, { ...metadata, filePath });
+    const mergedMetadata = {
+      ...metadata,
+      ...(filePath ? { filePath } : {}),
+    };
+    super(code, message, mergedMetadata);
     this.name = 'FileSystemError';
+    this.filePath = filePath;
+    Object.setPrototypeOf(this, FileSystemError.prototype);
   }
 }
 
@@ -88,16 +101,25 @@ export class FileSystemError extends MemoryMcpError {
  * 스키마 검증 에러
  */
 export class ValidationError extends MemoryMcpError {
+  public readonly field?: string;
+  public readonly value?: unknown;
+
   constructor(
     message: string,
-    validationErrors?: unknown,
+    field?: string,
+    value?: unknown,
     metadata?: Record<string, unknown>
   ) {
-    super(ErrorCode.SCHEMA_VALIDATION_ERROR, message, {
+    const mergedMetadata = {
       ...metadata,
-      validationErrors,
-    });
+      ...(field !== undefined ? { field } : {}),
+      ...(value !== undefined ? { value } : {}),
+    };
+    super(ErrorCode.SCHEMA_VALIDATION_ERROR, message, mergedMetadata);
     this.name = 'ValidationError';
+    this.field = field;
+    this.value = value;
+    Object.setPrototypeOf(this, ValidationError.prototype);
   }
 }
 
@@ -118,14 +140,82 @@ export class IndexError extends MemoryMcpError {
 /**
  * MCP 프로토콜 에러
  */
-export class McpProtocolError extends MemoryMcpError {
+export class ProtocolError extends MemoryMcpError {
+  public readonly protocolCode?: string;
+
   constructor(
-    code: ErrorCode,
     message: string,
-    metadata?: Record<string, unknown>
+    protocolCode?: string,
+    metadata?: Record<string, unknown>,
+    code: ErrorCode = ErrorCode.MCP_PROTOCOL_ERROR
   ) {
-    super(code, message, metadata);
-    this.name = 'McpProtocolError';
+    const mergedMetadata = {
+      ...metadata,
+      ...(protocolCode ? { protocolCode } : {}),
+    };
+    super(code, message, mergedMetadata);
+    this.name = 'ProtocolError';
+    this.protocolCode = protocolCode;
+    Object.setPrototypeOf(this, ProtocolError.prototype);
+  }
+}
+
+export function createErrorFromCode(
+  code: ErrorCode,
+  message: string,
+  metadata?: Record<string, unknown>
+): MemoryMcpError {
+  switch (code) {
+    case ErrorCode.FILE_NOT_FOUND:
+    case ErrorCode.FILE_READ_ERROR:
+    case ErrorCode.FILE_WRITE_ERROR:
+    case ErrorCode.INVALID_FILE_PATH: {
+      const filePath = metadata?.filePath as string | undefined;
+      return new FileSystemError(message, filePath, code, metadata);
+    }
+
+    case ErrorCode.INVALID_FRONT_MATTER:
+    case ErrorCode.INVALID_UID:
+    case ErrorCode.SCHEMA_VALIDATION_ERROR: {
+      const field = metadata?.field as string | undefined;
+      const value = metadata?.value;
+      return new ValidationError(message, field, value, metadata);
+    }
+
+    case ErrorCode.MCP_PROTOCOL_ERROR:
+    case ErrorCode.MCP_TOOL_ERROR:
+    case ErrorCode.MCP_INVALID_REQUEST: {
+      const protocolCode = metadata?.protocolCode as string | undefined;
+      return new ProtocolError(message, protocolCode, metadata, code);
+    }
+
+    default:
+      return new MemoryMcpError(code, message, metadata);
+  }
+}
+
+export function isMemoryMcpError(error: unknown): error is MemoryMcpError {
+  return error instanceof MemoryMcpError;
+}
+
+export function formatError(error: unknown): string {
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  if (error instanceof MemoryMcpError) {
+    const meta = error.metadata ? ` ${JSON.stringify(error.metadata)}` : '';
+    return `${error.name} [${error.code}]: ${error.message}${meta}`;
+  }
+
+  if (error instanceof Error) {
+    return `${error.name}: ${error.message}`;
+  }
+
+  try {
+    return `알 수 없는 오류: ${JSON.stringify(error)}`;
+  } catch {
+    return '알 수 없는 오류';
   }
 }
 
