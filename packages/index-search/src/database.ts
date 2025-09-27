@@ -2,7 +2,7 @@
  * SQLite 데이터베이스 스키마 관리 및 초기화
  */
 
-import Database from 'better-sqlite3';
+import DatabaseConstructor from 'better-sqlite3';
 import { logger } from '@memory-mcp/common';
 import { IndexConfig, DatabaseError } from './types';
 import * as path from 'path';
@@ -16,8 +16,10 @@ const SCHEMA_VERSION = 1;
 /**
  * 데이터베이스 관리자 클래스
  */
+export type SqliteDatabase = InstanceType<typeof DatabaseConstructor>;
+
 export class DatabaseManager {
-  private db: Database.Database;
+  private db: SqliteDatabase;
   private readonly config: IndexConfig;
 
   constructor(config: IndexConfig) {
@@ -30,7 +32,7 @@ export class DatabaseManager {
     }
 
     // 데이터베이스 연결
-    this.db = new Database(config.dbPath);
+    this.db = new DatabaseConstructor(config.dbPath);
     this.initialize();
   }
 
@@ -280,7 +282,7 @@ export class DatabaseManager {
   /**
    * 데이터베이스 연결 반환
    */
-  public getDatabase(): Database.Database {
+  public getDatabase(): SqliteDatabase {
     return this.db;
   }
 

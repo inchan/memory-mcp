@@ -10,7 +10,6 @@ import {
   createVaultWatcher,
   PACKAGE_VERSION
 } from '../index';
-import { FrontMatter } from '@memory-mcp/common';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { promises as fs } from 'fs';

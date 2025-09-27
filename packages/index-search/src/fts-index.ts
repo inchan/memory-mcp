@@ -2,7 +2,6 @@
  * SQLite FTS5 기반 전문 검색 엔진
  */
 
-import { Database } from 'better-sqlite3';
 import { logger, SearchResult } from '@memory-mcp/common';
 import { MarkdownNote } from '@memory-mcp/common';
 import {
@@ -11,21 +10,24 @@ import {
   SearchMetrics,
   EnhancedSearchResult
 } from './types';
+import type { SqliteDatabase } from './database';
+
+type Statement = ReturnType<SqliteDatabase['prepare']>;
 
 /**
  * FTS5 검색 엔진 클래스
  */
 export class FtsSearchEngine {
-  private db: Database;
+  private db: SqliteDatabase;
 
   // 준비된 쿼리문들 (성능 최적화)
-  private readonly searchStmt: Database.Statement;
-  private readonly insertStmt: Database.Statement;
-  private readonly updateStmt: Database.Statement;
-  private readonly deleteStmt: Database.Statement;
-  private readonly countStmt: Database.Statement;
+  private readonly searchStmt: Statement;
+  private readonly insertStmt: Statement;
+  private readonly updateStmt: Statement;
+  private readonly deleteStmt: Statement;
+  private readonly countStmt: Statement;
 
-  constructor(database: Database) {
+  constructor(database: SqliteDatabase) {
     this.db = database;
 
     // 준비된 쿼리문 초기화
@@ -49,11 +51,6 @@ export class FtsSearchEngine {
       logger.debug('FTS 검색 시작', { query, options });
 
       const {
-        limit = 50,
-        offset = 0,
-        category,
-        tags,
-        project,
         snippetLength = 150,
         highlightTag = 'mark'
       } = options;
@@ -66,7 +63,7 @@ export class FtsSearchEngine {
 
       // 검색 실행
       const queryStartTime = Date.now();
-      const rawResults = this.executeSearch(ftsQuery, params, limit, offset);
+      const rawResults = this.executeSearch(ftsQuery, params);
       const queryTime = Date.now() - queryStartTime;
 
       // 결과 처리 및 강화
@@ -112,7 +109,7 @@ export class FtsSearchEngine {
   /**
    * 노트를 FTS 인덱스에 추가
    */
-  public async indexNote(note: MarkdownNote): Promise<void> {
+  public indexNote(note: MarkdownNote): void {
     try {
       logger.debug('노트 인덱싱 시작', { uid: note.frontMatter.id });
 
@@ -138,7 +135,7 @@ export class FtsSearchEngine {
   /**
    * FTS 인덱스에서 노트 업데이트
    */
-  public async updateNote(note: MarkdownNote): Promise<void> {
+  public updateNote(note: MarkdownNote): void {
     try {
       logger.debug('노트 인덱스 업데이트 시작', { uid: note.frontMatter.id });
 
@@ -155,7 +152,7 @@ export class FtsSearchEngine {
 
       if (changes.changes === 0) {
         // 노트가 없으면 새로 추가
-        await this.indexNote(note);
+        this.indexNote(note);
       }
 
       logger.debug('노트 인덱스 업데이트 완료', { uid: note.frontMatter.id });
@@ -169,7 +166,7 @@ export class FtsSearchEngine {
   /**
    * FTS 인덱스에서 노트 삭제
    */
-  public async removeNote(noteUid: string): Promise<void> {
+  public removeNote(noteUid: string): void {
     try {
       logger.debug('노트 인덱스 삭제 시작', { uid: noteUid });
 
@@ -189,7 +186,7 @@ export class FtsSearchEngine {
   /**
    * 검색 쿼리 준비
    */
-  private prepareSearchQuery(): Database.Statement {
+  private prepareSearchQuery(): Statement {
     return this.db.prepare(`
       SELECT
         nf.uid,
@@ -198,12 +195,14 @@ export class FtsSearchEngine {
         nf.project,
         nf.tags,
         n.file_path,
-        bm25(notes_fts) as score,
-        highlight(notes_fts, 1, '<HIGHLIGHT>', '</HIGHLIGHT>') as title_highlight,
-        snippet(notes_fts, 2, '<HIGHLIGHT>', '</HIGHLIGHT>', '...', ?) as content_snippet
+        bm25(nf) as score,
+        highlight(nf, 1, '<HIGHLIGHT>', '</HIGHLIGHT>') as title_highlight,
+        snippet(nf, 2, '<HIGHLIGHT>', '</HIGHLIGHT>', '...', ?) as content_snippet,
+        COALESCE(GROUP_CONCAT(DISTINCT l.target_uid), '') as outgoing_links
       FROM notes_fts nf
       JOIN notes n ON nf.uid = n.uid
-      WHERE notes_fts MATCH ?
+      LEFT JOIN links l ON l.source_uid = nf.uid AND l.link_type = 'internal'
+      WHERE nf MATCH ?
         AND (? IS NULL OR nf.category = ?)
         AND (? IS NULL OR nf.project = ?)
         AND (? = 0 OR EXISTS (
@@ -211,7 +210,8 @@ export class FtsSearchEngine {
             SELECT value FROM json_each('[' || ? || ']')
           ) tags WHERE nf.tags LIKE '%' || tags.value || '%'
         ))
-      ORDER BY bm25(notes_fts)
+      GROUP BY nf.uid
+      ORDER BY bm25(nf)
       LIMIT ? OFFSET ?
     `);
   }
@@ -219,7 +219,7 @@ export class FtsSearchEngine {
   /**
    * 삽입 쿼리 준비
    */
-  private prepareInsertQuery(): Database.Statement {
+  private prepareInsertQuery(): Statement {
     return this.db.prepare(`
       INSERT INTO notes_fts (uid, title, content, tags, category, project)
       VALUES (@uid, @title, @content, @tags, @category, @project)
@@ -229,7 +229,7 @@ export class FtsSearchEngine {
   /**
    * 업데이트 쿼리 준비
    */
-  private prepareUpdateQuery(): Database.Statement {
+  private prepareUpdateQuery(): Statement {
     return this.db.prepare(`
       UPDATE notes_fts
       SET title = @title,
@@ -244,7 +244,7 @@ export class FtsSearchEngine {
   /**
    * 삭제 쿼리 준비
    */
-  private prepareDeleteQuery(): Database.Statement {
+  private prepareDeleteQuery(): Statement {
     return this.db.prepare(`
       DELETE FROM notes_fts WHERE uid = @uid
     `);
@@ -253,11 +253,11 @@ export class FtsSearchEngine {
   /**
    * 개수 쿼리 준비
    */
-  private prepareCountQuery(): Database.Statement {
+  private prepareCountQuery(): Statement {
     return this.db.prepare(`
-      SELECT COUNT(*) as count
+      SELECT COUNT(DISTINCT nf.uid) as count
       FROM notes_fts nf
-      WHERE notes_fts MATCH ?
+      WHERE nf MATCH ?
         AND (? IS NULL OR nf.category = ?)
         AND (? IS NULL OR nf.project = ?)
         AND (? = 0 OR EXISTS (
@@ -274,7 +274,7 @@ export class FtsSearchEngine {
   private buildSearchQuery(
     query: string,
     options: SearchOptions
-  ): { ftsQuery: string; params: any[] } {
+  ): { ftsQuery: string; params: unknown[] } {
     // FTS5 쿼리 문법으로 변환
     const ftsQuery = this.transformToFtsQuery(query);
 
@@ -284,7 +284,7 @@ export class FtsSearchEngine {
       '"' + tagsArray.join('","') + '"' : '';
 
     const params = [
-      20, // snippet length (lines)
+      this.estimateSnippetTokens(options.snippetLength ?? 150),
       ftsQuery,
       options.category || null,
       options.category || null,
@@ -292,8 +292,8 @@ export class FtsSearchEngine {
       options.project || null,
       tagsArray.length,
       tagsJson,
-      options.limit || 50,
-      options.offset || 0
+      options.limit ?? 50,
+      options.offset ?? 0
     ];
 
     return { ftsQuery, params };
@@ -328,14 +328,22 @@ export class FtsSearchEngine {
   }
 
   /**
+   * 스니펫 길이에 맞춰 토큰 수를 추정
+   */
+  private estimateSnippetTokens(snippetLength: number): number {
+    const normalized = Math.max(40, Math.min(400, snippetLength));
+    return Math.max(20, Math.floor(normalized / 4));
+  }
+
+  /**
    * 총 결과 수 조회
    */
-  private getTotalCount(ftsQuery: string, params: any[]): number {
+  private getTotalCount(ftsQuery: string, params: unknown[]): number {
     try {
       // count 쿼리용 파라미터 (snippet length 제외)
       const countParams = params.slice(1, -2); // limit, offset 제외
 
-      const result = this.countStmt.get(...countParams) as { count: number };
+      const result = (this.countStmt as any).get(...countParams) as { count: number };
       return result.count;
 
     } catch (error) {
@@ -347,14 +355,9 @@ export class FtsSearchEngine {
   /**
    * 검색 실행
    */
-  private executeSearch(
-    ftsQuery: string,
-    params: any[],
-    limit: number,
-    offset: number
-  ): any[] {
+  private executeSearch(ftsQuery: string, params: unknown[]): any[] {
     try {
-      return this.searchStmt.all(...params);
+      return (this.searchStmt as any).all(...params);
     } catch (error) {
       logger.error('FTS 쿼리 실행 실패', { ftsQuery, params, error });
       throw error;
@@ -373,6 +376,16 @@ export class FtsSearchEngine {
       // 태그 문자열을 배열로 변환
       const tags = row.tags ? row.tags.split(' ').filter((t: string) => t.length > 0) : [];
 
+      const links = row.outgoing_links
+        ? String(row.outgoing_links)
+            .split(',')
+            .map((value: string) => value.trim())
+            .filter((value: string) => value.length > 0)
+        : [];
+
+      const rawScore = typeof row.score === 'number' ? row.score : Number(row.score ?? 0);
+      const score = Number.isFinite(rawScore) && rawScore >= 0 ? 1 / (1 + rawScore) : 0;
+
       // 하이라이트 태그 변환
       const snippet = row.content_snippet
         ?.replace(/<HIGHLIGHT>/g, `<${highlightTag}>`)
@@ -387,10 +400,10 @@ export class FtsSearchEngine {
         title,
         category: row.category,
         snippet: this.truncateSnippet(snippet, snippetLength),
-        score: Math.max(0, -row.score), // BM25 점수는 음수이므로 변환
+        score,
         filePath: row.file_path,
         tags,
-        links: [] // 링크는 별도 쿼리에서 조회
+        links
       };
     });
   }
