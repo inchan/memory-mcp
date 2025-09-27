@@ -7,7 +7,7 @@
 
 import { Command } from "commander";
 import { logger } from "@memory-mcp/common";
-import { startServer } from "./server.js";
+import { startServer, type MemoryMcpServerOptions } from "./server.js";
 
 const program = new Command();
 
@@ -15,6 +15,11 @@ const program = new Command();
  * CLI 버전 정보
  */
 const PACKAGE_VERSION = "0.1.0";
+
+function parseInteger(value: string, defaultValue: number): number {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isNaN(parsed) ? defaultValue : parsed;
+}
 
 /**
  * CLI 프로그램 설정
@@ -33,20 +38,38 @@ program
   .option("--verbose", "상세 로그 출력", false)
   .option("--vault <path>", "볼트 디렉토리 경로", "./vault")
   .option("--index <path>", "인덱스 데이터베이스 경로", "./.memory-index.db")
+  .option("--mode <mode>", "동작 모드 (dev|prod)", "dev")
+  .option(
+    "--timeout <ms>",
+    "툴 실행 타임아웃 (ms)",
+    (value) => parseInteger(value, 5_000),
+    5_000
+  )
+  .option(
+    "--retries <count>",
+    "툴 실행 재시도 횟수",
+    (value) => parseInteger(value, 2),
+    2
+  )
   .action(async (options) => {
     if (options.verbose) {
       logger.setLevel("debug");
     }
 
-    logger.info("Memory MCP Server 시작 중...");
-    logger.info("설정:", {
-      vault: options.vault,
-      index: options.index,
-      verbose: options.verbose,
-    });
+    const serverOptions: MemoryMcpServerOptions = {
+      vaultPath: options.vault,
+      indexPath: options.index,
+      mode: options.mode,
+      policy: {
+        timeoutMs: options.timeout,
+        maxRetries: options.retries,
+      },
+    };
+
+    logger.info("Memory MCP Server 시작 중...", serverOptions);
 
     try {
-      await startServer();
+      await startServer(serverOptions);
     } catch (error) {
       logger.error("서버 시작 실패:", error);
       process.exit(1);

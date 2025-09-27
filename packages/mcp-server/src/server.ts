@@ -12,16 +12,61 @@ import {
   ListToolsRequestSchema,
   type CallToolRequest,
 } from "@modelcontextprotocol/sdk/types.js";
-import { logger } from "@memory-mcp/common";
+import { ErrorCode, MemoryMcpError, logger } from "@memory-mcp/common";
+import {
+  DEFAULT_EXECUTION_POLICY,
+  executeTool,
+  listTools,
+} from "./tools/index.js";
+import type { ToolExecutionContext } from "./tools/index.js";
+import type { ExecutionPolicyOptions } from "./tools/execution-policy.js";
+import type { ToolName } from "./tools/schemas.js";
+
+export interface MemoryMcpServerOptions {
+  vaultPath?: string;
+  indexPath?: string;
+  mode?: "dev" | "prod";
+  policy?: Partial<ExecutionPolicyOptions>;
+}
+
+type ResolvedServerOptions = {
+  vaultPath: string;
+  indexPath: string;
+  mode: "dev" | "prod";
+  policy: ExecutionPolicyOptions;
+};
+
+const DEFAULT_OPTIONS: ResolvedServerOptions = {
+  vaultPath: process.cwd(),
+  indexPath: `${process.cwd()}/.memory-index.db`,
+  mode: "dev",
+  policy: DEFAULT_EXECUTION_POLICY,
+};
 
 /**
  * MCP 서버 클래스
  * JSON-RPC 2.0 기반으로 stdin/stdout를 통해 통신
  */
 class MemoryMCPServer {
-  private server: Server;
+  private readonly server: Server;
+  private readonly options: ResolvedServerOptions;
+  private readonly toolContext: ToolExecutionContext;
 
-  constructor() {
+  constructor(options: MemoryMcpServerOptions = {}) {
+    const resolvedPolicy: ExecutionPolicyOptions = {
+      ...DEFAULT_EXECUTION_POLICY,
+      ...options.policy,
+    };
+
+    const resolvedOptions: ResolvedServerOptions = {
+      vaultPath: options.vaultPath ?? DEFAULT_OPTIONS.vaultPath,
+      indexPath: options.indexPath ?? DEFAULT_OPTIONS.indexPath,
+      mode: options.mode ?? DEFAULT_OPTIONS.mode,
+      policy: resolvedPolicy,
+    };
+
+    this.options = resolvedOptions;
+
     this.server = new Server(
       {
         name: "memory-mcp",
@@ -34,6 +79,14 @@ class MemoryMCPServer {
       }
     );
 
+    this.toolContext = {
+      vaultPath: this.options.vaultPath,
+      indexPath: this.options.indexPath,
+      mode: this.options.mode,
+      logger,
+      policy: this.options.policy,
+    };
+
     this.setupToolHandlers();
   }
 
@@ -41,121 +94,35 @@ class MemoryMCPServer {
    * 툴 핸들러 설정
    */
   private setupToolHandlers(): void {
-    // 사용 가능한 툴 목록 반환
-    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      return {
-        tools: [
-          {
-            name: "search_memory",
-            description: "메모리에서 검색",
-            inputSchema: {
-              type: "object",
-              properties: {
-                query: {
-                  type: "string",
-                  description: "검색할 키워드",
-                },
-              },
-              required: ["query"],
-            },
-          },
-          {
-            name: "create_note",
-            description: "새 노트 생성",
-            inputSchema: {
-              type: "object",
-              properties: {
-                title: {
-                  type: "string",
-                  description: "노트 제목",
-                },
-                content: {
-                  type: "string",
-                  description: "노트 내용",
-                },
-                category: {
-                  type: "string",
-                  description: "PARA 카테고리 (Projects/Areas/Resources/Archives)",
-                  enum: ["Projects", "Areas", "Resources", "Archives"],
-                },
-                tags: {
-                  type: "array",
-                  items: { type: "string" },
-                  description: "태그 목록",
-                },
-              },
-              required: ["title", "content"],
-            },
-          },
-        ],
-      };
-    });
+    this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
+      tools: listTools(),
+    }));
 
-    // 툴 실행 핸들러
-    this.server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest) => {
-      const { name, arguments: args } = request.params;
+    this.server.setRequestHandler(
+      CallToolRequestSchema,
+      async (request: CallToolRequest) => {
+        const toolName = request.params.name as ToolName;
+        const args = request.params.arguments ?? {};
 
-      try {
-        switch (name) {
-          case "search_memory":
-            return await this.handleSearchMemory(args);
-          case "create_note":
-            return await this.handleCreateNote(args);
-          default:
-            throw new Error(`Unknown tool: ${name}`);
+        try {
+          return await executeTool(toolName, args, this.toolContext);
+        } catch (error) {
+          logger.error(`Tool execution error for ${toolName}:`, error);
+
+          if (error instanceof MemoryMcpError) {
+            throw error;
+          }
+
+          throw new MemoryMcpError(
+            ErrorCode.MCP_TOOL_ERROR,
+            `툴 실행 중 예기치 못한 오류가 발생했습니다: ${String(error)}`,
+            {
+              tool: toolName,
+            }
+          );
         }
-      } catch (error) {
-        logger.error(`Tool execution error for ${name}:`, error);
-        throw error;
       }
-    });
-  }
-
-  /**
-   * 메모리 검색 핸들러
-   */
-  private async handleSearchMemory(args: unknown): Promise<{ content: Array<{ type: string; text: string }> }> {
-    // TODO: 실제 검색 로직 구현
-    const { query } = args as { query: string };
-
-    logger.info(`Searching memory for: ${query}`);
-
-    return {
-      content: [
-        {
-          type: "text",
-          text: `검색 결과 (구현 예정): "${query}"에 대한 검색이 요청되었습니다.`,
-        },
-      ],
-    };
-  }
-
-  /**
-   * 노트 생성 핸들러
-   */
-  private async handleCreateNote(args: unknown): Promise<{ content: Array<{ type: string; text: string }> }> {
-    // TODO: 실제 노트 생성 로직 구현
-    const { title, content, category = "Resources", tags = [] } = args as {
-      title: string;
-      content: string;
-      category?: string;
-      tags?: string[];
-    };
-
-    logger.info(`Creating note: ${title}`);
-
-    return {
-      content: [
-        {
-          type: "text",
-          text: `노트 생성 완료 (구현 예정):
-제목: ${title}
-카테고리: ${category}
-태그: ${tags.join(", ")}
-내용 길이: ${content.length} 문자`,
-        },
-      ],
-    };
+    );
   }
 
   /**
@@ -164,22 +131,25 @@ class MemoryMCPServer {
   async start(): Promise<void> {
     const transport = new StdioServerTransport();
 
-    logger.info("Starting Memory MCP Server...");
+    logger.info("Starting Memory MCP Server...", {
+      vaultPath: this.options.vaultPath,
+      indexPath: this.options.indexPath,
+      mode: this.options.mode,
+      policy: this.options.policy,
+    });
 
-    // 에러 핸들링
-    process.on('SIGINT', async () => {
-      logger.info('Received SIGINT, shutting down gracefully...');
+    process.on("SIGINT", async () => {
+      logger.info("Received SIGINT, shutting down gracefully...");
       await this.server.close();
       process.exit(0);
     });
 
-    process.on('SIGTERM', async () => {
-      logger.info('Received SIGTERM, shutting down gracefully...');
+    process.on("SIGTERM", async () => {
+      logger.info("Received SIGTERM, shutting down gracefully...");
       await this.server.close();
       process.exit(0);
     });
 
-    // 서버 시작
     await this.server.connect(transport);
     logger.info("Memory MCP Server started successfully");
   }
@@ -188,8 +158,10 @@ class MemoryMCPServer {
 /**
  * 서버 인스턴스 생성 및 시작
  */
-export async function startServer(): Promise<void> {
-  const server = new MemoryMCPServer();
+export async function startServer(
+  options: MemoryMcpServerOptions = {}
+): Promise<void> {
+  const server = new MemoryMCPServer(options);
   await server.start();
 }
 

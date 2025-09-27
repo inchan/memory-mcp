@@ -36,5 +36,7 @@ module.exports = {
   verbose: true,
   clearMocks: true,
   resetMocks: true,
-  restoreMocks: true
+  restoreMocks: true,
+  resolver: '<rootDir>/jest.resolver.cjs',
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/__tests__/setup.ts$']
 };
