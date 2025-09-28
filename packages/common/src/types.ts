@@ -33,8 +33,11 @@ export interface LinkGraphNode {
   id: string;
   title: string;
   category: string;
-  filePath: string;
-  links: string[];
+  filePath?: string;
+  links?: string[];
+  outgoingLinks: string[];
+  incomingLinks: string[];
+  tags: string[];
   score?: number;
   depth?: number;
 }

@@ -7,7 +7,7 @@ import {
 import { createNewNote, saveNote } from '@memory-mcp/storage-md';
 import {
   createDefaultSearchEngine,
-  SearchEngine,
+  IndexSearchEngine,
 } from '@memory-mcp/index-search';
 import {
   AssociationEngine,
@@ -61,9 +61,9 @@ function logToolEvent(
 }
 
 // 검색 엔진 인스턴스 캐시 (indexPath 기준)
-const searchEngineCache = new Map<string, SearchEngine>();
+const searchEngineCache = new Map<string, IndexSearchEngine>();
 const associationEngineCache = new Map<string, AssociationEngine>();
-let searchEngineFactory: (_indexPath: string) => SearchEngine =
+let searchEngineFactory: (_indexPath: string) => IndexSearchEngine =
   createDefaultSearchEngine;
 const sessionContextManager = new SessionContextManager();
 const reflectionEngine = new ReflectionEngine();
@@ -81,7 +81,7 @@ function resolveIndexPath(context: ToolExecutionContext): string {
   return path.resolve(context.vaultPath, rawIndexPath);
 }
 
-function getSearchEngine(context: ToolExecutionContext): SearchEngine {
+function getSearchEngine(context: ToolExecutionContext): IndexSearchEngine {
   const resolvedIndexPath = resolveIndexPath(context);
   const cached = searchEngineCache.get(resolvedIndexPath);
 
@@ -138,12 +138,12 @@ export function resolveIndexPathForTests(
 
 export function getSearchEngineForTests(
   context: ToolExecutionContext
-): SearchEngine {
+): IndexSearchEngine {
   return getSearchEngine(context);
 }
 
 export function setSearchEngineFactoryForTests(
-  factory?: (_indexPath: string) => SearchEngine
+  factory?: (_indexPath: string) => IndexSearchEngine
 ): void {
   searchEngineFactory = factory ?? createDefaultSearchEngine;
   searchEngineCache.clear();
@@ -232,7 +232,7 @@ const searchMemoryDefinition: ToolDefinition<typeof SearchMemoryInputSchema> = {
 
       // 검색 결과 포맷팅
       const formattedResults = searchResult.results
-        .map((result, index) => {
+        .map((result: any, index: number) => {
           const resultText = [
             `**${index + 1}. ${result.title}**`,
             `📁 ${result.category} | ⭐ ${result.score.toFixed(2)}`,
@@ -278,7 +278,7 @@ const searchMemoryDefinition: ToolDefinition<typeof SearchMemoryInputSchema> = {
             resultsCount: searchResult.results.length,
             totalCount: searchResult.totalCount,
             searchTimeMs: searchResult.metrics.totalTimeMs,
-            results: searchResult.results.map(r => ({
+            results: searchResult.results.map((r: any) => ({
               id: r.id,
               title: r.title,
               category: r.category,
@@ -503,7 +503,7 @@ const associateMemoryDefinition: ToolDefinition<
       );
 
       const formatted = result.recommendations
-        .map((recommendation, index) => {
+        .map((recommendation: any, index: number) => {
           const details = [
             `**${index + 1}. ${recommendation.title}**`,
             `- 점수: ${(recommendation.score * 100).toFixed(1)}`,
@@ -854,7 +854,7 @@ async function executeToolWithDefinition(
 
   try {
     const result = await withExecutionPolicy<ToolResult>(
-      () => definition.handler(parsedInput, context),
+      () => definition.handler(parsedInput as any, context),
       {
         ...policy,
         onRetry: ({ attempt, error }) => {

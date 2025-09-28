@@ -26,7 +26,11 @@
       "Bash(git add:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nfix: implement code review improvements and enhance MCP server functionality\n\n코드 리뷰에서 식별된 주요 문제들을 해결하고 MCP 서버의 기능을 크게 개선했습니다.\n\n주요 개선사항:\n- 🔒 보안: 민감정보 마스킹 범위를 전체 내용으로 확대\n- 💾 기능: storage-md 패키지와 실제 통합하여 노트 생성 기능 구현\n- 🛡️ 타입 안전성: as any 제거하고 런타임 검증 기반 타입 처리 개선\n- 🏥 헬스체크: CLI 헬스체크 실제 로직 구현 (볼트/인덱스/의존성/권한 검증)\n- 🧹 코드 품질: 도달 불가능한 코드 제거 및 에러 처리 일관성 개선\n\n변경된 파일:\n- packages/mcp-server/src/tools/registry.ts: 실제 노트 생성 구현, 보안 강화\n- packages/mcp-server/src/cli.ts: 종합적인 헬스체크 기능 구현\n- packages/mcp-server/src/tools/execution-policy.ts: 불필요한 코드 제거\n- packages/mcp-server/src/tools/__tests__/tool-registry.test.ts: import 문법 수정\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(git push:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(npm run test:coverage:*)",
+      "Bash(npm run test:*)",
+      "Bash(timeout 30 npm run test)",
+      "Read(//Users/inchan/**)"
     ],
     "deny": [],
     "ask": []

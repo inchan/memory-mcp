@@ -1,6 +1,7 @@
 import path from 'path';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
+import { promises as fs } from 'fs';
 import { logger, maskSensitiveInfo } from '@memory-mcp/common';
 import { normalizePath } from './file-operations';
 import type {
@@ -164,17 +165,43 @@ export class GitSnapshotManager {
    */
   private ensureRelativeToRepo(filePath: string): string | null {
     if (!this.repositoryRoot) {
+      logger.debug('ensureRelativeToRepo - repositoryRoot is null', { filePath });
       return null;
     }
 
-    const relative = normalizePath(path.relative(this.repositoryRoot, filePath));
+    try {
+      // 실제 경로로 해결하여 심링크 문제 해결
+      const realFilePath = normalizePath(fs.realpathSync(filePath));
+      const realRepoRoot = normalizePath(this.repositoryRoot); // 이미 realpath로 설정됨
 
-    if (relative.startsWith('..')) {
-      logger.warn('Git 스냅샷에서 제외된 파일 (저장소 외부)', { filePath });
-      return null;
+      const relative = normalizePath(path.relative(realRepoRoot, realFilePath));
+
+      if (relative.startsWith('..')) {
+        logger.warn('Git 스냅샷에서 제외된 파일 (저장소 외부)', { filePath });
+        return null;
+      }
+
+      return relative;
+    } catch (error) {
+      // 파일이 존재하지 않는 경우 (삭제된 파일) 기본 경로로 처리
+      // macOS에서 /var는 /private/var의 심링크이므로 경로 정규화 필요
+      const realRepoRoot = normalizePath(this.repositoryRoot);
+
+      // filePath가 /var로 시작하면 /private/var로 변환하여 경로 일치시킴
+      let normalizedFilePath = filePath;
+      if (filePath.startsWith('/var/') && !filePath.startsWith('/private/var/')) {
+        normalizedFilePath = '/private' + filePath;
+      }
+
+      const relative = normalizePath(path.relative(realRepoRoot, normalizedFilePath));
+
+      if (relative.startsWith('..')) {
+        logger.warn('Git 스냅샷에서 제외된 파일 (저장소 외부)', { filePath });
+        return null;
+      }
+
+      return relative;
     }
-
-    return relative;
   }
 
   /**

@@ -54,7 +54,7 @@ describe("tool registry configuration", () => {
       indexNote: jest.fn().mockResolvedValue(undefined),
     } as unknown as ReturnType<typeof IndexSearch.createDefaultSearchEngine>;
     const factoryStub = jest
-      .fn<typeof IndexSearch.createDefaultSearchEngine, Parameters<typeof IndexSearch.createDefaultSearchEngine>>()
+      .fn()
       .mockImplementation(() => searchEngineStub);
     setSearchEngineFactoryForTests(factoryStub);
 
@@ -79,7 +79,7 @@ describe("tool registry configuration", () => {
       indexNote: jest.fn().mockResolvedValue(undefined),
     } as unknown as ReturnType<typeof IndexSearch.createDefaultSearchEngine>;
     const factoryStub = jest
-      .fn<typeof IndexSearch.createDefaultSearchEngine, Parameters<typeof IndexSearch.createDefaultSearchEngine>>()
+      .fn()
       .mockImplementation(() => searchEngineStub);
     setSearchEngineFactoryForTests(factoryStub);
 
