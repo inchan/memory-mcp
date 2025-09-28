@@ -4,6 +4,7 @@
 
 ### Runtime & Language
 - **Node.js 18+ / TypeScript 5+**
+- **Olima Engine**: 로컬 패키지(`@memory-mcp/assoc-engine`)로 번들되어 외부 서비스 불필요
 - 선택: Rust (핵심 인덱싱 모듈 최적화 시)
 
 ### Core Libraries

@@ -119,6 +119,7 @@ npm 패키지 배포(npx 실행), Docker 이미지, CI/CD 자동화
 - **PARA 구조 관리**: 자동 카테고리 분류 및 아카이브
 - **MCP 검색 툴 안정화**: `createDefaultSearchEngine` 팩토리로 search_memory 툴 즉시 사용 가능
 - **Olima 연상 툴 제공**: `associate_memory`, `session_context`, `reflect_session` 툴로 추천/컨텍스트/요약 지원
+- **Olima 로컬 구성 완료**: 외부 API 의존성 없이 로컬 번들된 연상 엔진 사용
 - **구성 신뢰성 향상**: CLI에서 지정한 인덱스 경로와 실행 정책 재정의가 테스트로 검증됨
 - **Docker 실행 지원**: 경량 Alpine 기반 이미지 + `/vault` 볼륨 마운트 + 비루트 사용자 실행
 

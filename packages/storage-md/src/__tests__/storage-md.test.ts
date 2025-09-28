@@ -258,6 +258,10 @@ describe('GitSnapshotManager', () => {
     const filePath = join(repoDir, 'note.md');
     await fs.writeFile(filePath, '# No snapshot');
 
+    const headBefore = await execFileAsync('git', ['rev-parse', 'HEAD'], {
+      cwd: repoDir,
+    });
+
     const result = await manager.createSnapshot([
       {
         type: 'change',
@@ -272,9 +276,11 @@ describe('GitSnapshotManager', () => {
     });
     expect(status.stdout).toContain('?? note.md');
 
-    await expect(
-      execFileAsync('git', ['rev-parse', '--verify', 'HEAD'], { cwd: repoDir })
-    ).rejects.toHaveProperty('code');
+    const headAfter = await execFileAsync('git', ['rev-parse', 'HEAD'], {
+      cwd: repoDir,
+    });
+
+    expect(headAfter.stdout.trim()).toBe(headBefore.stdout.trim());
   });
 });
 

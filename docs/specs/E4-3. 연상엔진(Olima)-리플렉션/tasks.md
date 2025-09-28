@@ -12,3 +12,4 @@
 [x] 07. 통합 테스트(로컬 시나리오) - [04, 05] (b567702: reflection-engine.test.ts 완료)
 [ ] 08. 성능 벤치(샘플 1만 문서) - [07] (미구현: 성능 벤치마크 스크립트 필요)
 [x] 09. 문서화(README/샘플) - [07] (assoc-engine 패키지 README.md 존재)
+[x] 10. 로컬 Olima 리플렉션 가이드 반영 - [09] (plan/ROADMAP 갱신)

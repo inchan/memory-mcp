@@ -5,7 +5,7 @@
 ## 🎯 주요 목표 (Project Major Goals)
 1. **Local-first, Markdown 기반 퍼시스턴트 메모리**: 사용자의 로컬 디스크에 Markdown(+YAML Front Matter)로 저장하며, 편집/버전관리/백업이 쉬운 구조.
 2. **PARA + Zettelkasten 통합**: PARA로 상위 분류(Projects/Areas/Resources/Archives), ZK로 UID/양방향 링크/백링크를 통한 지식 그래프 구축.
-3. **Olima 연상 엔진**: 세션/주제 문맥을 반영한 연상 검색과 자동 추천(related notes, 최근 맥락 기반 리랭킹).
+3. **Olima 연상 엔진 (로컬 런타임)**: 세션/주제 문맥을 반영한 연상 검색과 자동 추천(related notes, 최근 맥락 기반 리랭킹).
 4. **고성능 검색**: SQLite FTS5 기반 전문 검색 + 링크 그래프 탐색(초기) → 임베딩 유사도 검색(확장).
 5. **MCP 표준 서버/CLI**: `npx`로 즉시 실행 가능, Claude 등 MCP 호환 에이전트와 무설정 연동.
 6. **안전성과 투명성**: 원자적 파일쓰기, 민감정보 마스킹, 감사 가능한 구조적 로그, 테스트 커버리지 80%+.

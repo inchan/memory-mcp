@@ -2,6 +2,7 @@
 
 ## 🎯 목표
 연상엔진(Olima) / 세션컨텍스트: 세션 문맥/주제 기반 연상 검색과 자동 추천/리플렉션
+- 로컬에 설치된 Olima 런타임(`@memory-mcp/assoc-engine`)과 연동하는 컨텍스트 저장소 유지
 
 ## 🔄 병렬 작업 구조 (Tracks)
 ### Track A: API/MCP

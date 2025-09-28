@@ -2,6 +2,7 @@
 
 ## 🎯 목표
 연상엔진(Olima) / 연관추천: 세션 문맥/주제 기반 연상 검색과 자동 추천/리플렉션
+- 로컬에 설치된 Olima 런타임(`@memory-mcp/assoc-engine`)을 기준으로 구현
 
 ## 🔄 병렬 작업 구조 (Tracks)
 ### Track A: API/MCP

@@ -29,6 +29,7 @@
 
 ### 🧠 **연상 엔진 (Olima)**
 - 🔄 기본 구조 구현, 고급 기능 개발 중
+- 🏠 **로컬 설치본 사용**: 외부 API 호출 없이 `@memory-mcp/assoc-engine` 패키지에 포함된 Olima 런타임으로 동작합니다.
 
 ## 🚀 즉시 사용하기
 
@@ -45,6 +46,11 @@ npx memory-mcp --vault ~/my-vault --index ~/.memory-index.db
 # --index: SQLite 검색 인덱스 파일 위치
 # --log-level: debug, info, warn, error
 ```
+
+### Olima 로컬 환경 준비
+- 연상 엔진은 `@memory-mcp/assoc-engine` 패키지에 번들된 **로컬 Olima 런타임**을 사용합니다.
+- 신규 환경에서 실행하기 전에 `npm install && npm run build`로 로컬 런타임을 컴파일해 주세요.
+- 네트워크가 차단된 환경에서도 동작하며, 외부 LLM API에 의존하지 않습니다.
 
 ### Docker 실행
 ```bash
