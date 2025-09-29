@@ -71,10 +71,18 @@ export class BacklinkManager extends EventEmitter {
     };
 
     // 디바운스된 동기화 함수 생성
-    this.debouncedSync = debounce(
+    const debounced = debounce(
       () => this.processPendingUpdates(),
       this.options.debounceMs
     );
+
+    if (typeof debounced === 'function') {
+      this.debouncedSync = debounced;
+    } else {
+      logger.warn('디바운스 함수 생성에 실패하여 기본 no-op 핸들러를 사용합니다');
+      this.debouncedSync = () => {};
+      (this.debouncedSync as any).cancel = () => {};
+    }
 
     logger.debug('BacklinkManager 생성', {
       vaultPath: this.vaultPath,
@@ -285,8 +293,7 @@ export class BacklinkManager extends EventEmitter {
       logger.info(`전체 백링크 재빌드 시작: ${this.vaultPath}`);
 
       // 모든 노트 로드 (간단한 스캔)
-      const { listFiles } = await import('./file-operations.js');
-      const markdownFiles = await listFiles(this.vaultPath, /\.md$/i, true);
+      const markdownFiles = await this.listMarkdownFiles();
 
       logger.debug(`${markdownFiles.length}개 파일 발견`);
 
@@ -332,8 +339,7 @@ export class BacklinkManager extends EventEmitter {
       logger.debug(`삭제된 노트의 백링크 정리: ${deletedUid}`);
 
       // 모든 노트에서 삭제된 UID로의 링크 제거
-      const { listFiles } = await import('./file-operations.js');
-      const markdownFiles = await listFiles(this.vaultPath, /\.md$/i, true);
+      const markdownFiles = await this.listMarkdownFiles();
 
       const affectedNotes: Uid[] = [];
 
@@ -413,6 +419,11 @@ export class BacklinkManager extends EventEmitter {
   onError(handler: (error: Error) => void): this {
     this.on('error', handler);
     return this;
+  }
+
+  private async listMarkdownFiles(): Promise<string[]> {
+    const { listFiles } = await import('./file-operations.js');
+    return listFiles(this.vaultPath, /\.md$/i, true);
   }
 }
 
