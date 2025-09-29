@@ -1,7 +1,7 @@
 import path from 'path';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
-import { promises as fs } from 'fs';
+import { realpathSync } from 'fs';
 import { logger, maskSensitiveInfo } from '@memory-mcp/common';
 import { normalizePath } from './file-operations';
 import type {
@@ -164,15 +164,17 @@ export class GitSnapshotManager {
    * 저장소 내 상대 경로 확인
    */
   private ensureRelativeToRepo(filePath: string): string | null {
-    if (!this.repositoryRoot) {
-      logger.debug('ensureRelativeToRepo - repositoryRoot is null', { filePath });
+    const repoBasePath = this.repositoryRoot ?? this.options.repositoryPath ?? this.repositoryPath;
+
+    if (!repoBasePath) {
+      logger.debug('ensureRelativeToRepo - repository path is not available', { filePath });
       return null;
     }
 
     try {
       // 실제 경로로 해결하여 심링크 문제 해결
-      const realFilePath = normalizePath(fs.realpathSync(filePath));
-      const realRepoRoot = normalizePath(this.repositoryRoot); // 이미 realpath로 설정됨
+      const realFilePath = normalizePath(realpathSync(filePath));
+      const realRepoRoot = normalizePath(realpathSync(repoBasePath));
 
       const relative = normalizePath(path.relative(realRepoRoot, realFilePath));
 
@@ -185,7 +187,7 @@ export class GitSnapshotManager {
     } catch (error) {
       // 파일이 존재하지 않는 경우 (삭제된 파일) 기본 경로로 처리
       // macOS에서 /var는 /private/var의 심링크이므로 경로 정규화 필요
-      const realRepoRoot = normalizePath(this.repositoryRoot);
+      const realRepoRoot = normalizePath(repoBasePath);
 
       // filePath가 /var로 시작하면 /private/var로 변환하여 경로 일치시킴
       let normalizedFilePath = filePath;
@@ -193,7 +195,7 @@ export class GitSnapshotManager {
         normalizedFilePath = '/private' + filePath;
       }
 
-      const relative = normalizePath(path.relative(realRepoRoot, normalizedFilePath));
+      const relative = normalizePath(path.relative(realRepoRoot, normalizePath(normalizedFilePath)));
 
       if (relative.startsWith('..')) {
         logger.warn('Git 스냅샷에서 제외된 파일 (저장소 외부)', { filePath });
@@ -239,9 +241,13 @@ export class GitSnapshotManager {
 
     const message = this.renderTemplate(this.options.commitMessageTemplate, fileCount);
 
-    await this.executeWithRetry(async () => {
-      await this.runGit(['commit', '-m', message]);
-    }, 'GIT_COMMIT_ERROR');
+    await this.executeWithRetry(
+      async () => {
+        await this.runGit(['commit', '-m', message]);
+      },
+      'GIT_COMMIT_ERROR',
+      0
+    );
 
     const commit = await this.runGit(['rev-parse', 'HEAD']);
     this.hasHead = true;
@@ -321,8 +327,12 @@ export class GitSnapshotManager {
         };
       }
 
+      const originalMessage = typeof error?.message === 'string' && error.message.length > 0
+        ? `: ${error.message}`
+        : '';
+
       throw new StorageMdError(
-        `Git 명령 실패: ${this.options.gitBinary} ${args.join(' ')}`,
+        `Git 명령 실패: ${this.options.gitBinary} ${args.join(' ')}${originalMessage}`,
         'GIT_COMMAND_ERROR',
         cwd,
         error
@@ -333,23 +343,34 @@ export class GitSnapshotManager {
   /**
    * 재시도 유틸리티
    */
-  private async executeWithRetry(fn: () => Promise<void>, errorCode: string): Promise<void> {
-    let attempt = 0;
+  private async executeWithRetry(
+    fn: () => Promise<void>,
+    errorCode: string,
+    maxRetries = this.options.retries,
+  ): Promise<void> {
     let lastError: unknown;
 
-    while (attempt <= this.options.retries) {
+    for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
       try {
         await fn();
         return;
       } catch (error) {
         lastError = error;
-        attempt += 1;
 
-        if (attempt > this.options.retries) {
-          throw new StorageMdError('Git 스냅샷 작업 실패', errorCode, this.repositoryPath, lastError);
+        if (attempt === maxRetries) {
+          const causeMessage = error instanceof Error && error.message.length > 0
+            ? `: ${error.message}`
+            : '';
+
+          throw new StorageMdError(
+            `Git 스냅샷 작업 실패${causeMessage}`,
+            errorCode,
+            this.repositoryPath,
+            lastError
+          );
         }
 
-        await new Promise(resolve => setTimeout(resolve, attempt * 50));
+        await new Promise(resolve => setTimeout(resolve, (attempt + 1) * 50));
       }
     }
   }
