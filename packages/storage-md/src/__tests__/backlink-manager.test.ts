@@ -14,24 +14,32 @@ import { MarkdownNote } from '@memory-mcp/common';
 // Mock dependencies
 jest.mock('../note-manager');
 jest.mock('../front-matter');
-jest.mock('../file-operations');
-jest.mock('@memory-mcp/common', () => ({
-  logger: {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  },
-  debounce: jest.fn((fn, delay) => {
-    const debouncedFn = jest.fn(fn);
-    (debouncedFn as any).cancel = jest.fn();
-    return debouncedFn;
-  }),
-}));
+jest.mock('@memory-mcp/common', () => {
+  const debounce = (fn: (...args: any[]) => any) => {
+    const wrapper = (...args: any[]) => {
+      (wrapper as any).lastArgs = args;
+    };
+
+    (wrapper as any).cancel = jest.fn();
+    (wrapper as any).runNow = () => fn(...(((wrapper as any).lastArgs as any[]) ?? []));
+
+    return wrapper;
+  };
+
+  return {
+    __esModule: true,
+    logger: {
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    },
+    debounce: jest.fn(debounce),
+  };
+});
 
 import * as noteManager from '../note-manager';
 import * as frontMatter from '../front-matter';
-import * as fileOperations from '../file-operations';
 
 // 임시 테스트 디렉토리
 const TEST_VAULT_PATH = path.join(__dirname, '../../test-vault');
@@ -57,7 +65,7 @@ describe('BacklinkManager', () => {
     (noteManager.saveNote as jest.Mock).mockClear();
     (noteManager.loadNote as jest.Mock).mockClear();
     (frontMatter.updateFrontMatter as jest.Mock).mockClear();
-    (fileOperations.listFiles as jest.Mock).mockClear();
+    jest.clearAllMocks();
 
     manager = new BacklinkManager(TEMP_DIR);
   });
@@ -243,44 +251,33 @@ describe('BacklinkManager', () => {
     });
 
     test('전체 백링크 재빌드', async () => {
-      const mockFiles = [
-        '/vault/note1.md',
-        '/vault/note2.md',
-        '/vault/note3.md'
-      ];
+      const mockFiles = ['/vault/note1.md', '/vault/note2.md'];
 
-      const mockNotes = [
-        { frontMatter: { id: 'note1' } },
-        { frontMatter: { id: 'note2' } },
-        { frontMatter: { id: 'note3' } }
-      ];
+      const listSpy = jest
+        .spyOn(manager as any, 'listMarkdownFiles')
+        .mockResolvedValue(mockFiles);
 
-      // dynamic import를 직접 mock으로 대체
-      const mockRebuildMethod = jest.fn().mockImplementation(async function(this: any) {
-        const markdownFiles = ['/vault/note1.md', '/vault/note2.md'];
-        const uids = ['note1', 'note2'];
+      (noteManager.loadNote as jest.Mock)
+        .mockResolvedValueOnce({ frontMatter: { id: 'note1' } })
+        .mockResolvedValueOnce({ frontMatter: { id: 'note2' } });
 
-        for (const uid of uids) {
-          try {
-            await this.syncBacklinksForNote(uid);
-          } catch (error) {
-            // 테스트에서는 무시
-          }
-        }
-      });
+      const syncSpy = jest
+        .spyOn(manager, 'syncBacklinksForNote')
+        .mockResolvedValue();
 
-      // rebuildAllBacklinks 메서드를 mock으로 교체
-      manager.rebuildAllBacklinks = mockRebuildMethod;
+      await expect(manager.rebuildAllBacklinks()).resolves.toBeUndefined();
 
-      await manager.rebuildAllBacklinks();
-
-      expect(mockRebuildMethod).toHaveBeenCalled();
+      expect(manager.syncBacklinksForNote).toHaveBeenCalledTimes(2);
+      syncSpy.mockRestore();
+      listSpy.mockRestore();
     });
 
     test('파일 로드 실패 시 건너뛰기', async () => {
       const mockFiles = ['/vault/note1.md', '/vault/note2.md'];
 
-      (fileOperations.listFiles as jest.Mock).mockResolvedValue(mockFiles);
+      const listSpy = jest
+        .spyOn(manager as any, 'listMarkdownFiles')
+        .mockResolvedValue(mockFiles);
       (noteManager.loadNote as jest.Mock)
         .mockResolvedValueOnce({ frontMatter: { id: 'note1' } })
         .mockRejectedValueOnce(new Error('파일 읽기 실패'));
@@ -288,6 +285,7 @@ describe('BacklinkManager', () => {
       await expect(manager.rebuildAllBacklinks()).resolves.toBeUndefined();
 
       expect(noteManager.loadNote).toHaveBeenCalledTimes(2);
+      listSpy.mockRestore();
     });
   });
 
@@ -314,7 +312,9 @@ describe('BacklinkManager', () => {
         }
       };
 
-      (fileOperations.listFiles as jest.Mock).mockResolvedValue(mockFiles);
+      const listSpy = jest
+        .spyOn(manager as any, 'listMarkdownFiles')
+        .mockResolvedValue(mockFiles);
       (noteManager.loadNote as jest.Mock)
         .mockResolvedValueOnce(note1)
         .mockResolvedValueOnce(note2);
@@ -340,6 +340,7 @@ describe('BacklinkManager', () => {
         targetUid: deletedUid,
         affectedNotes: ['note1']
       });
+      listSpy.mockRestore();
     });
 
     test('영향받은 노트가 없는 경우', async () => {
@@ -353,7 +354,9 @@ describe('BacklinkManager', () => {
         }
       };
 
-      (fileOperations.listFiles as jest.Mock).mockResolvedValue(mockFiles);
+      const listSpy = jest
+        .spyOn(manager as any, 'listMarkdownFiles')
+        .mockResolvedValue(mockFiles);
       (noteManager.loadNote as jest.Mock).mockResolvedValue(note1);
 
       let syncEventFired = false;
@@ -363,6 +366,7 @@ describe('BacklinkManager', () => {
 
       expect(noteManager.saveNote).not.toHaveBeenCalled();
       expect(syncEventFired).toBe(false);
+      listSpy.mockRestore();
     });
   });
 
@@ -386,6 +390,8 @@ describe('BacklinkManager', () => {
         } as MarkdownNote
       };
 
+      expect(typeof (manager as any).debouncedSync).toBe('function');
+
       eventHandler(eventData);
 
       expect(manager.syncStats.pendingUpdates).toBe(1);
@@ -407,15 +413,15 @@ describe('BacklinkManager', () => {
       const eventData: FileWatchEventData = {
         type: 'change',
         filePath: '/vault/test.md',
-        note: null as any // 잘못된 노트 데이터
+        note: { frontMatter: undefined } as any,
       };
 
-      let errorFired = false;
-      manager.once('error', () => { errorFired = true; });
+      const errorHandler = jest.fn();
+      manager.once('error', errorHandler);
 
       eventHandler(eventData);
 
-      expect(errorFired).toBe(true);
+      expect(errorHandler).toHaveBeenCalled();
     });
   });
 

@@ -8,12 +8,11 @@ import fs from 'fs/promises';
 import { GitSnapshotManager } from '../git-snapshot';
 import { FileWatchEventData, GitSnapshotResult } from '../types';
 
-// Mock child_process
-const mockExecFile = jest.fn();
-
 jest.mock('child_process', () => ({
-  execFile: mockExecFile,
+  execFile: jest.fn(),
 }));
+
+const mockExecFile = jest.requireMock('child_process').execFile as jest.Mock;
 
 jest.mock('util', () => ({
   promisify: jest.fn((fn) => fn),
