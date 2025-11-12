@@ -1,6 +1,10 @@
 export { executeTool, listTools } from "./registry.js";
 export {
   CreateNoteInputSchema,
+  ReadNoteInputSchema,
+  UpdateNoteInputSchema,
+  DeleteNoteInputSchema,
+  ListNotesInputSchema,
   SearchMemoryInputSchema,
   ToolNameSchema,
 } from "./schemas.js";
