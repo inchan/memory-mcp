@@ -27,7 +27,76 @@ We use semantic versioning with pre-release tags:
 
 This is the first alpha release with MVP functionality (create_note, read_note, list_notes).
 
-## Publishing to npm
+## Automated Deployment (Recommended)
+
+The project uses GitHub Actions for automated deployment to npm when changes are merged to the `release` branch.
+
+### Setup GitHub Actions Deployment
+
+#### 1. Create npm Access Token
+
+1. Login to npm: https://www.npmjs.com/
+2. Go to **Access Tokens** in your account settings
+3. Click **Generate New Token** → **Classic Token**
+4. Select type: **Automation** (for CI/CD)
+5. Copy the token (you won't see it again!)
+
+#### 2. Add NPM_TOKEN to GitHub Secrets
+
+1. Go to your GitHub repository settings
+2. Navigate to **Settings** → **Secrets and variables** → **Actions**
+3. Click **New repository secret**
+4. Name: `NPM_TOKEN`
+5. Value: Paste your npm token
+6. Click **Add secret**
+
+#### 3. Deploy by Merging to Release Branch
+
+Once the secret is configured, deployment is automatic:
+
+```bash
+# 1. Update version in package.json
+cd packages/mcp-server
+# Edit package.json to bump version (e.g., 0.1.0-alpha.0 → 0.1.0-alpha.1)
+
+# 2. Update CHANGELOG.md with release notes
+
+# 3. Commit changes
+git add packages/mcp-server/package.json CHANGELOG.md
+git commit -m "chore: release v0.1.0-alpha.1"
+
+# 4. Push to release branch (or merge PR to release)
+git push origin release
+```
+
+**What happens automatically:**
+1. GitHub Actions runs tests, linting, type checking
+2. Builds all packages
+3. Publishes to npm with appropriate tag (alpha/beta/latest)
+4. Creates a Git tag (e.g., `v0.1.0-alpha.1`)
+5. Creates a GitHub Release
+
+**Version tag detection:**
+- `*-alpha.*` → published with `@alpha` tag
+- `*-beta.*` → published with `@beta` tag
+- `*-rc.*` → published with `@rc` tag
+- Otherwise → published with `@latest` tag
+
+### Workflow Details
+
+The release workflow (`.github/workflows/release.yml`) is triggered when:
+- Changes are pushed to `release` branch
+- Files in `packages/*/src/**` or `packages/*/package.json` are modified
+
+The workflow automatically:
+- Checks if the version in `package.json` has changed
+- Skips publishing if version tag already exists
+- Runs full CI pipeline before publishing
+- Determines npm tag based on version string
+
+## Manual Deployment (Alternative)
+
+If you need to publish manually (e.g., from local machine):
 
 ### Prerequisites
 
