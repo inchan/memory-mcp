@@ -1,7 +1,9 @@
 {
   "name": "@memory-mcp/index-search",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.0",
   "description": "FTS/그래프 인덱싱 & 검색",
+  "private": true,
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -12,7 +14,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@memory-mcp/common": "^0.1.0",
+    "@memory-mcp/common": "^0.1.0-alpha.0",
     "better-sqlite3": "^9.2.2"
   },
   "devDependencies": {

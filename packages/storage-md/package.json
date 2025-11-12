@@ -1,7 +1,9 @@
 {
   "name": "@memory-mcp/storage-md",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.0",
   "description": "Markdown 파일 저장/로드와 Front Matter 처리",
+  "private": true,
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -12,7 +14,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@memory-mcp/common": "^0.1.0",
+    "@memory-mcp/common": "^0.1.0-alpha.0",
     "gray-matter": "^4.0.3",
     "remark": "^14.0.3",
     "chokidar": "^3.5.3"
