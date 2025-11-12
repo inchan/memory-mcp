@@ -1,7 +1,7 @@
 {
   "name": "@memory-mcp/mcp-server",
-  "version": "0.1.0",
-  "description": "MCP 인터페이스/툴 노출",
+  "version": "0.1.0-alpha.0",
+  "description": "Local-first persistent memory MCP server with PARA + Zettelkasten + SQLite FTS5",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -13,7 +13,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "clean": "rm -rf dist",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@memory-mcp/assoc-engine": "^0.1.0",
@@ -29,8 +30,35 @@
     "@types/node": "^20.10.0"
   },
   "keywords": [
-    "memory-mcp",
+    "mcp",
     "mcp-server",
-    "cli"
-  ]
+    "memory",
+    "zettelkasten",
+    "para",
+    "markdown",
+    "sqlite",
+    "fts5",
+    "knowledge-management",
+    "local-first",
+    "personal-knowledge",
+    "note-taking",
+    "pkm"
+  ],
+  "author": "Memory MCP Project",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inchan/memory-mcp.git",
+    "directory": "packages/mcp-server"
+  },
+  "bugs": {
+    "url": "https://github.com/inchan/memory-mcp/issues"
+  },
+  "homepage": "https://github.com/inchan/memory-mcp#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

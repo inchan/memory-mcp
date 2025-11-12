@@ -45,5 +45,13 @@
     "knowledge-management"
   ],
   "author": "Memory MCP Project",
-  "license": "TBD"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inchan/memory-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/inchan/memory-mcp/issues"
+  },
+  "homepage": "https://github.com/inchan/memory-mcp#readme"
 }
