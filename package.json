@@ -10,15 +10,15 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "npm run build --workspaces",
+    "build": "tsc --build",
     "dev": "npm run dev --workspaces",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint packages/*/src/**/*.ts",
     "lint:fix": "eslint packages/*/src/**/*.ts --fix",
-    "typecheck": "tsc --noEmit",
-    "clean": "npm run clean --workspaces",
+    "typecheck": "tsc --build",
+    "clean": "npm run clean --workspaces && tsc --build --clean",
     "start": "node packages/mcp-server/dist/index.js"
   },
   "devDependencies": {

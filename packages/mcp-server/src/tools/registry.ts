@@ -2,7 +2,7 @@
  * MCP Tool Registry - 도구 정의 및 실행
  */
 
-import path from "path";
+import path from 'path';
 import {
   ErrorCode,
   MemoryMcpError,
@@ -10,7 +10,7 @@ import {
   maskSensitiveInfo,
   generateUid,
   type Uid,
-} from "@memory-mcp/common";
+} from '@memory-mcp/common';
 import {
   createNewNote,
   saveNote,
@@ -20,8 +20,8 @@ import {
   normalizePath,
   generateNoteMetadata,
   analyzeLinks,
-} from "@memory-mcp/storage-md";
-import { zodToJsonSchema } from "zod-to-json-schema";
+} from '@memory-mcp/storage-md';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   CreateNoteInputSchema,
   ReadNoteInputSchema,
@@ -33,20 +33,27 @@ import {
   type ReadNoteInput,
   type ListNotesInput,
   type SearchMemoryInput,
-} from "./schemas.js";
+} from './schemas.js';
 import {
   type ToolDefinition,
   type ToolExecutionContext,
   type ToolResult,
-} from "./types.js";
-import { DEFAULT_EXECUTION_POLICY, withExecutionPolicy } from "./execution-policy.js";
+} from './types.js';
+import {
+  DEFAULT_EXECUTION_POLICY,
+  withExecutionPolicy,
+} from './execution-policy.js';
 
 type JsonSchema = ReturnType<typeof zodToJsonSchema>;
 
 /**
  * Helper: 파일 경로 생성
  */
-function generateFilePath(vaultPath: string, title: string, uid: string): string {
+function generateFilePath(
+  vaultPath: string,
+  title: string,
+  uid: string
+): string {
   const sanitizedTitle = sanitizeFileName(title).toLowerCase().slice(0, 50);
   const fileName = `${sanitizedTitle}-${uid}.md`;
   return normalizePath(path.join(vaultPath, fileName));
@@ -56,8 +63,9 @@ function generateFilePath(vaultPath: string, title: string, uid: string): string
  * Tool: search_memory (Mock - 추후 index-search 통합)
  */
 const searchMemoryDefinition: ToolDefinition<typeof SearchMemoryInputSchema> = {
-  name: "search_memory",
-  description: "메모리 볼트에서 키워드를 검색합니다. (현재는 기본 구현, 추후 FTS5 통합 예정)",
+  name: 'search_memory',
+  description:
+    '메모리 볼트에서 키워드를 검색합니다. (현재는 기본 구현, 추후 FTS5 통합 예정)',
   schema: SearchMemoryInputSchema,
   async handler(input: SearchMemoryInput): Promise<ToolResult> {
     const { query, limit = 10, category, tags = [] } = input;
@@ -65,14 +73,14 @@ const searchMemoryDefinition: ToolDefinition<typeof SearchMemoryInputSchema> = {
     return {
       content: [
         {
-          type: "text",
+          type: 'text',
           text: `검색 기능은 index-search 통합 준비 중입니다 (v0.2.0).
 
 현재는 list_notes 도구를 사용하여 노트를 탐색할 수 있습니다.
 
 요청하신 쿼리: ${query}
-카테고리: ${category ?? "(지정되지 않음)"}
-태그: ${tags.join(", ") || "(없음)"}
+카테고리: ${category ?? '(지정되지 않음)'}
+태그: ${tags.join(', ') || '(없음)'}
 최대 결과 수: ${limit}`,
         },
       ],
@@ -92,10 +100,13 @@ const searchMemoryDefinition: ToolDefinition<typeof SearchMemoryInputSchema> = {
  * Tool: create_note
  */
 const createNoteDefinition: ToolDefinition<typeof CreateNoteInputSchema> = {
-  name: "create_note",
-  description: "새로운 Markdown 노트를 생성합니다.",
+  name: 'create_note',
+  description: '새로운 Markdown 노트를 생성합니다.',
   schema: CreateNoteInputSchema,
-  async handler(input: CreateNoteInput, context: ToolExecutionContext): Promise<ToolResult> {
+  async handler(
+    input: CreateNoteInput,
+    context: ToolExecutionContext
+  ): Promise<ToolResult> {
     const { title, content, category, tags, project, links } = input;
 
     try {
@@ -107,7 +118,7 @@ const createNoteDefinition: ToolDefinition<typeof CreateNoteInputSchema> = {
 
       context.logger.debug(
         `[tool:create_note] 노트 생성 시작`,
-        createLogEntry("debug", "create_note.start", {
+        createLogEntry('debug', 'create_note.start', {
           title,
           category,
           uid,
@@ -126,7 +137,7 @@ const createNoteDefinition: ToolDefinition<typeof CreateNoteInputSchema> = {
 
       context.logger.info(
         `[tool:create_note] 노트 생성 완료: ${uid}`,
-        createLogEntry("info", "create_note.success", {
+        createLogEntry('info', 'create_note.success', {
           uid: note.frontMatter.id,
           title: note.frontMatter.title,
           filePath: note.filePath,
@@ -136,14 +147,14 @@ const createNoteDefinition: ToolDefinition<typeof CreateNoteInputSchema> = {
       return {
         content: [
           {
-            type: "text",
+            type: 'text',
             text: `✓ 노트가 생성되었습니다.
 
 **ID**: ${note.frontMatter.id}
 **제목**: ${note.frontMatter.title}
 **카테고리**: ${note.frontMatter.category}
-**태그**: ${note.frontMatter.tags.join(", ") || "(없음)"}
-**프로젝트**: ${note.frontMatter.project || "(없음)"}
+**태그**: ${note.frontMatter.tags.join(', ') || '(없음)'}
+**프로젝트**: ${note.frontMatter.project || '(없음)'}
 **파일**: ${path.basename(note.filePath)}
 **생성 시간**: ${note.frontMatter.created}`,
           },
@@ -161,11 +172,12 @@ const createNoteDefinition: ToolDefinition<typeof CreateNoteInputSchema> = {
         },
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
 
       context.logger.error(
         `[tool:create_note] 노트 생성 실패`,
-        createLogEntry("error", "create_note.error", {
+        createLogEntry('error', 'create_note.error', {
           title,
           error: errorMessage,
         })
@@ -184,16 +196,20 @@ const createNoteDefinition: ToolDefinition<typeof CreateNoteInputSchema> = {
  * Tool: read_note
  */
 const readNoteDefinition: ToolDefinition<typeof ReadNoteInputSchema> = {
-  name: "read_note",
-  description: "UID로 노트를 조회합니다. 옵션으로 메타데이터와 링크 분석을 포함할 수 있습니다.",
+  name: 'read_note',
+  description:
+    'UID로 노트를 조회합니다. 옵션으로 메타데이터와 링크 분석을 포함할 수 있습니다.',
   schema: ReadNoteInputSchema,
-  async handler(input: ReadNoteInput, context: ToolExecutionContext): Promise<ToolResult> {
+  async handler(
+    input: ReadNoteInput,
+    context: ToolExecutionContext
+  ): Promise<ToolResult> {
     const { uid, includeMetadata = false, includeLinks = false } = input;
 
     try {
       context.logger.debug(
         `[tool:read_note] 노트 조회 시작: ${uid}`,
-        createLogEntry("debug", "read_note.start", { uid })
+        createLogEntry('debug', 'read_note.start', { uid })
       );
 
       // Find note by UID
@@ -212,11 +228,11 @@ const readNoteDefinition: ToolDefinition<typeof ReadNoteInputSchema> = {
 
 **ID**: ${note.frontMatter.id}
 **카테고리**: ${note.frontMatter.category}
-**태그**: ${note.frontMatter.tags.join(", ") || "(없음)"}
-**프로젝트**: ${note.frontMatter.project || "(없음)"}
+**태그**: ${note.frontMatter.tags.join(', ') || '(없음)'}
+**프로젝트**: ${note.frontMatter.project || '(없음)'}
 **생성**: ${note.frontMatter.created}
 **수정**: ${note.frontMatter.updated}
-**링크**: ${note.frontMatter.links.join(", ") || "(없음)"}
+**링크**: ${note.frontMatter.links.join(', ') || '(없음)'}
 
 ---
 
@@ -286,11 +302,11 @@ ${note.content}`;
 
       context.logger.info(
         `[tool:read_note] 노트 조회 완료: ${uid}`,
-        createLogEntry("info", "read_note.success", { uid })
+        createLogEntry('info', 'read_note.success', { uid })
       );
 
       return {
-        content: [{ type: "text", text: responseText }],
+        content: [{ type: 'text', text: responseText }],
         _meta: { metadata },
       };
     } catch (error) {
@@ -298,11 +314,12 @@ ${note.content}`;
         throw error;
       }
 
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
 
       context.logger.error(
         `[tool:read_note] 노트 조회 실패: ${uid}`,
-        createLogEntry("error", "read_note.error", { uid, error: errorMessage })
+        createLogEntry('error', 'read_note.error', { uid, error: errorMessage })
       );
 
       throw new MemoryMcpError(
@@ -318,24 +335,28 @@ ${note.content}`;
  * Tool: list_notes
  */
 const listNotesDefinition: ToolDefinition<typeof ListNotesInputSchema> = {
-  name: "list_notes",
-  description: "볼트의 노트 목록을 조회합니다. 카테고리, 태그, 프로젝트로 필터링할 수 있습니다.",
+  name: 'list_notes',
+  description:
+    '볼트의 노트 목록을 조회합니다. 카테고리, 태그, 프로젝트로 필터링할 수 있습니다.',
   schema: ListNotesInputSchema,
-  async handler(input: ListNotesInput, context: ToolExecutionContext): Promise<ToolResult> {
+  async handler(
+    input: ListNotesInput,
+    context: ToolExecutionContext
+  ): Promise<ToolResult> {
     const {
       category,
       tags,
       project,
       limit = 100,
       offset = 0,
-      sortBy = "updated",
-      sortOrder = "desc",
+      sortBy = 'updated',
+      sortOrder = 'desc',
     } = input;
 
     try {
       context.logger.debug(
         `[tool:list_notes] 목록 조회 시작`,
-        createLogEntry("debug", "list_notes.start", {
+        createLogEntry('debug', 'list_notes.start', {
           filters: { category, tags, project },
         })
       );
@@ -348,7 +369,7 @@ const listNotesDefinition: ToolDefinition<typeof ListNotesInputSchema> = {
 
       context.logger.debug(
         `[tool:list_notes] 전체 노트 로드 완료: ${allNotes.length}개`,
-        createLogEntry("debug", "list_notes.loaded", { total: allNotes.length })
+        createLogEntry('debug', 'list_notes.loaded', { total: allNotes.length })
       );
 
       // Apply filters
@@ -378,15 +399,15 @@ const listNotesDefinition: ToolDefinition<typeof ListNotesInputSchema> = {
         let bValue: string;
 
         switch (sortBy) {
-          case "created":
+          case 'created':
             aValue = a.frontMatter.created;
             bValue = b.frontMatter.created;
             break;
-          case "updated":
+          case 'updated':
             aValue = a.frontMatter.updated;
             bValue = b.frontMatter.updated;
             break;
-          case "title":
+          case 'title':
             aValue = a.frontMatter.title.toLowerCase();
             bValue = b.frontMatter.title.toLowerCase();
             break;
@@ -396,7 +417,7 @@ const listNotesDefinition: ToolDefinition<typeof ListNotesInputSchema> = {
         }
 
         const comparison = aValue.localeCompare(bValue);
-        return sortOrder === "asc" ? comparison : -comparison;
+        return sortOrder === 'asc' ? comparison : -comparison;
       });
 
       const total = filteredNotes.length;
@@ -426,7 +447,8 @@ const listNotesDefinition: ToolDefinition<typeof ListNotesInputSchema> = {
       if (category || tags || project) {
         responseText += `\n**필터**:\n`;
         if (category) responseText += `- 카테고리: ${category}\n`;
-        if (tags && tags.length > 0) responseText += `- 태그: ${tags.join(", ")}\n`;
+        if (tags && tags.length > 0)
+          responseText += `- 태그: ${tags.join(', ')}\n`;
         if (project) responseText += `- 프로젝트: ${project}\n`;
       }
 
@@ -436,7 +458,7 @@ const listNotesDefinition: ToolDefinition<typeof ListNotesInputSchema> = {
         responseText += `${offset + index + 1}. **${note.frontMatter.title}**
    - ID: \`${note.frontMatter.id}\`
    - 카테고리: ${note.frontMatter.category}
-   - 태그: ${note.frontMatter.tags.join(", ") || "(없음)"}
+   - 태그: ${note.frontMatter.tags.join(', ') || '(없음)'}
    - 업데이트: ${note.frontMatter.updated}
    - 링크: ${note.frontMatter.links.length}개
 
@@ -449,7 +471,7 @@ const listNotesDefinition: ToolDefinition<typeof ListNotesInputSchema> = {
 
       context.logger.info(
         `[tool:list_notes] 목록 조회 완료`,
-        createLogEntry("info", "list_notes.success", {
+        createLogEntry('info', 'list_notes.success', {
           total,
           filtered: paginatedNotes.length,
           filters: { category, tags, project },
@@ -457,7 +479,7 @@ const listNotesDefinition: ToolDefinition<typeof ListNotesInputSchema> = {
       );
 
       return {
-        content: [{ type: "text", text: responseText }],
+        content: [{ type: 'text', text: responseText }],
         _meta: {
           metadata: {
             total,
@@ -473,11 +495,12 @@ const listNotesDefinition: ToolDefinition<typeof ListNotesInputSchema> = {
         },
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
 
       context.logger.error(
         `[tool:list_notes] 목록 조회 실패`,
-        createLogEntry("error", "list_notes.error", { error: errorMessage })
+        createLogEntry('error', 'list_notes.error', { error: errorMessage })
       );
 
       throw new MemoryMcpError(
@@ -527,7 +550,7 @@ export function listTools(): Array<{
   description: string;
   inputSchema: JsonSchema;
 }> {
-  return toolDefinitions.map((definition) => ({
+  return toolDefinitions.map(definition => ({
     name: definition.name as ToolName,
     description: definition.description,
     inputSchema: toJsonSchema(definition),
@@ -541,7 +564,7 @@ export async function executeTool(
   name: ToolName,
   rawInput: unknown,
   context: ToolExecutionContext,
-  overrides?: Partial<ToolExecutionContext["policy"]>
+  overrides?: Partial<ToolExecutionContext['policy']>
 ): Promise<ToolResult> {
   const parseResult = ToolNameSchema.safeParse(name);
   if (!parseResult.success) {
@@ -560,16 +583,18 @@ export async function executeTool(
     );
   }
 
-  const parsedInput = await definition.schema.parseAsync(rawInput).catch((error: unknown) => {
-    throw new MemoryMcpError(
-      ErrorCode.SCHEMA_VALIDATION_ERROR,
-      "툴 입력이 유효하지 않습니다.",
-      {
-        validationErrors: error instanceof Error ? error.message : error,
-        tool: definition.name,
-      }
-    );
-  });
+  const parsedInput = await definition.schema
+    .parseAsync(rawInput)
+    .catch((error: unknown) => {
+      throw new MemoryMcpError(
+        ErrorCode.SCHEMA_VALIDATION_ERROR,
+        '툴 입력이 유효하지 않습니다.',
+        {
+          validationErrors: error instanceof Error ? error.message : error,
+          tool: definition.name,
+        }
+      );
+    });
 
   const policy = {
     ...DEFAULT_EXECUTION_POLICY,
@@ -580,9 +605,12 @@ export async function executeTool(
   const startTime = Date.now();
   context.logger.debug(
     `[tool:${definition.name}] 실행 시작`,
-    createLogEntry("debug", "tool.start", {
+    createLogEntry('debug', 'tool.start', {
       name: definition.name,
-      inputPreview: maskSensitiveInfo(JSON.stringify(parsedInput)).slice(0, 200),
+      inputPreview: maskSensitiveInfo(JSON.stringify(parsedInput)).slice(
+        0,
+        200
+      ),
     })
   );
 
@@ -594,7 +622,7 @@ export async function executeTool(
         onRetry: ({ attempt, error }) => {
           context.logger.warn(
             `[tool:${definition.name}] ${attempt}차 시도 실패`,
-            createLogEntry("warn", "tool.retry", {
+            createLogEntry('warn', 'tool.retry', {
               attempt,
               error: error instanceof Error ? error.message : String(error),
               name: definition.name,
@@ -607,7 +635,7 @@ export async function executeTool(
     const duration = Date.now() - startTime;
     context.logger.info(
       `[tool:${definition.name}] 실행 완료 (${duration}ms)`,
-      createLogEntry("info", "tool.success", {
+      createLogEntry('info', 'tool.success', {
         duration,
         name: definition.name,
       })
@@ -618,7 +646,7 @@ export async function executeTool(
     const duration = Date.now() - startTime;
     context.logger.error(
       `[tool:${definition.name}] 실행 실패 (${duration}ms)`,
-      createLogEntry("error", "tool.failure", {
+      createLogEntry('error', 'tool.failure', {
         duration,
         name: definition.name,
         error: error instanceof Error ? error.message : String(error),

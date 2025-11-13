@@ -1,6 +1,6 @@
-import { ErrorCode, MemoryMcpError } from "@memory-mcp/common";
+import { ErrorCode, MemoryMcpError } from '@memory-mcp/common';
 
-type RetryHook = (context: { attempt: number; error: unknown }) => void;
+type RetryHook = (_context: { attempt: number; error: unknown }) => void;
 
 export interface ExecutionPolicyOptions {
   /**
@@ -74,7 +74,7 @@ export async function withExecutionPolicy<T>(
 
         throw new MemoryMcpError(
           ErrorCode.MCP_TOOL_ERROR,
-          "툴 실행 중 예기치 못한 오류가 발생했습니다.",
+          '툴 실행 중 예기치 못한 오류가 발생했습니다.',
           {
             cause: error instanceof Error ? error.message : String(error),
           }
@@ -87,7 +87,7 @@ export async function withExecutionPolicy<T>(
 
   throw new MemoryMcpError(
     ErrorCode.INTERNAL_ERROR,
-    "툴 실행 정책을 적용하는 동안 알 수 없는 오류가 발생했습니다.",
+    '툴 실행 정책을 적용하는 동안 알 수 없는 오류가 발생했습니다.',
     { lastError }
   );
 }

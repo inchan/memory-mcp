@@ -9,7 +9,8 @@ process.env.NODE_ENV = 'test';
 jest.setTimeout(10000);
 
 // 글로벌 에러 핸들러
-process.on('unhandledRejection', (reason) => {
+process.on('unhandledRejection', reason => {
+  // eslint-disable-next-line no-console
   console.error('Unhandled Promise Rejection:', reason);
 });
 

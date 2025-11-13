@@ -8,7 +8,7 @@ import {
   createNewNote,
   parseFrontMatter,
   createVaultWatcher,
-  PACKAGE_VERSION
+  PACKAGE_VERSION,
 } from '../index';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -69,7 +69,9 @@ This is a test note.`;
     expect(result.frontMatter.title).toBe('Test Note');
     expect(result.frontMatter.category).toBe('Resources');
     expect(result.frontMatter.tags).toEqual(['test', 'example']);
-    expect(result.content.trim()).toBe('# Test Content\n\nThis is a test note.');
+    expect(result.content.trim()).toBe(
+      '# Test Content\n\nThis is a test note.'
+    );
   });
 
   test('노트 저장 및 로드', async () => {
@@ -95,7 +97,9 @@ This is a test note.`;
 
     // 내용 비교
     expect(loadedNote.frontMatter.title).toBe(originalNote.frontMatter.title);
-    expect(loadedNote.frontMatter.category).toBe(originalNote.frontMatter.category);
+    expect(loadedNote.frontMatter.category).toBe(
+      originalNote.frontMatter.category
+    );
     expect(loadedNote.content).toBe(originalNote.content);
     expect(loadedNote.filePath).toBe(originalNote.filePath);
   });
@@ -103,7 +107,7 @@ This is a test note.`;
   test('볼트 감시자 생성', () => {
     const watcher = createVaultWatcher(testDir, {
       debounceMs: 100,
-      recursive: true
+      recursive: true,
     });
 
     expect(watcher).toBeDefined();
@@ -130,7 +134,11 @@ Content here`;
 });
 
 describe('Integration Tests', () => {
-  const testDir = join(tmpdir(), 'storage-md-integration', Date.now().toString());
+  const testDir = join(
+    tmpdir(),
+    'storage-md-integration',
+    Date.now().toString()
+  );
 
   beforeAll(async () => {
     await fs.mkdir(testDir, { recursive: true });
@@ -173,6 +181,8 @@ describe('Integration Tests', () => {
     const finalNote = await loadNote(testFilePath);
     expect(finalNote.content).toBe('# Updated Content\n\nModified content.');
     expect(finalNote.frontMatter.tags).toEqual(['updated', 'test']);
-    expect(finalNote.frontMatter.updated).not.toBe(finalNote.frontMatter.created);
+    expect(finalNote.frontMatter.updated).not.toBe(
+      finalNote.frontMatter.created
+    );
   });
 });
