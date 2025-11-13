@@ -68,40 +68,49 @@ SDD and TDD work together seamlessly:
 
 ### Example Workflow
 
-```rust
+```typescript
 // 1. RFC defines the interface
-// docs/specs/rfcs/0001-cli-interface.md:
+// docs/specs/rfcs/0001-search-interface.md:
 //
-// ```rust
-// pub struct SyncCommand {
-//     pub agent: Option<String>,
+// ```typescript
+// interface SearchQuery {
+//   query: string;
+//   filter?: { category?: string; tags?: string[] };
 // }
-// impl CommandHandler for SyncCommand {
-//     fn execute(&self) -> Result<()>;
+// interface SearchEngine {
+//   search(query: SearchQuery): Promise<SearchResult[]>;
 // }
 // ```
 
 // 2. Write failing test (Red)
-#[test]
-fn test_sync_executes_successfully() {
-    let cmd = SyncCommand { agent: None };
-    assert!(cmd.execute().is_ok());  // Fails - not implemented
-}
+describe('SearchEngine', () => {
+  it('should search and return results', async () => {
+    const engine = new SearchEngine(mockIndex);
+    const results = await engine.search({ query: 'test' });
+    expect(results).toHaveLength(1);  // Fails - not implemented
+  });
+});
 
 // 3. Minimal implementation (Green)
-impl CommandHandler for SyncCommand {
-    fn execute(&self) -> Result<()> {
-        Ok(())  // Test passes
-    }
+class SearchEngine implements SearchEngine {
+  async search(query: SearchQuery): Promise<SearchResult[]> {
+    return [];  // Test passes (after adjusting assertion)
+  }
 }
 
 // 4. Refactor with actual logic
-impl CommandHandler for SyncCommand {
-    fn execute(&self) -> Result<()> {
-        let config = ConfigManager::load()?;
-        self.sync_files(&config)?;
-        Ok(())
-    }
+class SearchEngine implements SearchEngine {
+  constructor(private index: FTSIndex) {}
+
+  async search(query: SearchQuery): Promise<SearchResult[]> {
+    const results = await this.index.query(query.query);
+    return this.applyFilters(results, query.filter);
+  }
+
+  private applyFilters(results: RawResult[], filter?: Filter): SearchResult[] {
+    // Apply filtering logic
+    return results.filter(r => this.matchesFilter(r, filter));
+  }
 }
 ```
 
