@@ -79,8 +79,16 @@ links: ["other-note-id"]        # Connected notes
 
 ## Documentation
 
+### ✅ [Validation Strategy](./docs/VALIDATION_STRATEGY.md) - 최우선!
+**"검증을 어떻게 할 것인가?"** - 구체적인 검증 방법론:
+- 검증 5단계 (타입/단위/통합/E2E/성능보안)
+- 자동화된 검증 파이프라인
+- 검증 체크리스트
+- 실전 예제
+
 ### 📋 [Development Guidelines](./docs/DEVELOPMENT_GUIDELINES.md)
 Coding principles and best practices:
+- Validation First (최우선 원칙)
 - SOLID, DRY, KISS, YAGNI principles
 - Test-Driven Development (TDD)
 - SDD + TDD Integration workflow
@@ -195,7 +203,20 @@ npm run build --workspace=@memory-mcp/mcp-server
 
 ## Project Philosophy
 
-This project follows:
+### 🎯 Validation First (최우선 원칙)
+**"검증을 어떻게 할 것인가?"를 먼저 생각하고, 코드는 나중에 작성합니다.**
+
+- **Define Validation Method First**: Before writing code, define how to validate it
+- **No Validation, No Code**: No implementation without validation strategy
+- **Automated Testing**: All validation must be automated (CI/CD)
+- **Never Skip**: Validation failures must be fixed immediately
+
+📖 See [VALIDATION_STRATEGY.md](./docs/VALIDATION_STRATEGY.md) for detailed methodology
+
+---
+
+### Other Core Principles
+
 - **Test-Driven Development**: Write tests first, implement second
 - **Simplicity First**: Keep it simple, add complexity only when needed
 - **Clear Documentation**: All significant decisions and structures are documented
