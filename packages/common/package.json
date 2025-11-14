@@ -9,8 +9,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "test": "cd ../.. && npx jest packages/common",
+    "test:watch": "cd ../.. && npx jest --watch packages/common",
     "clean": "rm -rf dist"
   },
   "dependencies": {

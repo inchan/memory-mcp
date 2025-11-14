@@ -143,9 +143,19 @@ export interface BacklinkInfo {
   linkText?: string;
 
   /**
-   * 링크 주변 컨텍스트
+   * 링크 주변 컨텍스트 (레거시, 하위 호환성용)
+   * @deprecated contexts 배열 사용 권장
    */
   context?: string;
+
+  /**
+   * 모든 백링크 컨텍스트 (다중 참조 지원)
+   */
+  contexts?: Array<{
+    snippet: string;
+    lineNumber: number;
+    linkType: 'wiki' | 'markdown';
+  }>;
 }
 
 /**

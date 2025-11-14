@@ -328,10 +328,9 @@ async function findBacklinks(
         const parsedLinks = parseAllLinks(note.content);
 
         if (parsedLinks.all.includes(targetUid)) {
-          // 링크 컨텍스트 추출 (새 함수 사용)
+          // 링크 컨텍스트 추출 (모든 컨텍스트)
           const contexts = extractBacklinkContext(note.content, targetUid);
 
-          // 각 문맥마다 백링크 추가
           const backlink: BacklinkInfo = {
             sourceUid: note.frontMatter.id,
             sourceFilePath: filePath,
@@ -339,9 +338,13 @@ async function findBacklinks(
             linkText: targetUid,
           };
 
-          // 컨텍스트가 있으면 추가
-          if (contexts.length > 0 && contexts[0]) {
-            backlink.context = contexts[0].snippet;
+          // 모든 컨텍스트 저장
+          if (contexts.length > 0) {
+            backlink.contexts = contexts;
+            // 하위 호환성: 첫 번째 컨텍스트를 레거시 필드에도 저장
+            if (contexts[0]) {
+              backlink.context = contexts[0].snippet;
+            }
           }
 
           backlinks.push(backlink);
