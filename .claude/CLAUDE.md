@@ -6,14 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Memory MCP (Olima + Basic-Memory + Zettelkasten + PARA)** is a TypeScript/Node.js based knowledge management system that exposes local persistent memory as an MCP server. The goal is to build a knowledge management system that can be immediately utilized by MCP-compatible agents like Claude.
+**Zettel Memory (Olima + Basic-Memory + Zettelkasten + PARA)** is a TypeScript/Node.js based knowledge management system that exposes local persistent memory as an MCP server. The goal is to build a knowledge management system that can be immediately utilized by MCP-compatible agents like Claude.
 
 ### Core Features
 - **Markdown Storage**: YAML Front Matter + local file system
 - **Full-Text Search**: SQLite FTS5 based search + link graph
 - **PARA Organization**: Projects/Areas/Resources/Archives + Zettelkasten
 - **Olima Association Engine**: Session context-based associative search and recommendations
-- **MCP Interface**: Standard MCP server/CLI (`npx memory-mcp`)
+- **MCP Interface**: Standard MCP server/CLI (`npx zettel-memory`)
 
 ### Technology Stack
 - **Runtime**: Node.js 18+ / TypeScript 5+
@@ -154,7 +154,7 @@ npm run clean
 # Run MCP server
 npm start
 # or
-npx memory-mcp --vault ~/vault --index ~/.memory-index.db
+npx zettel-memory --vault ~/vault --index ~/.memory-index.db
 ```
 
 ### Working with Individual Packages
@@ -170,7 +170,7 @@ npm run dev
 npm test
 
 # Or from root, target specific package
-npm run build --workspace=@memory-mcp/mcp-server
+npm run build --workspace=@inchan/zettel-memory
 ```
 
 ### Code Conventions

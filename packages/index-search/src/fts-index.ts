@@ -2,8 +2,8 @@
  * SQLite FTS5 기반 전문 검색 엔진
  */
 
-import { logger, SearchResult } from '@memory-mcp/common';
-import { MarkdownNote } from '@memory-mcp/common';
+import { logger, SearchResult } from '@inchan/zettel-memory-common';
+import { MarkdownNote } from '@inchan/zettel-memory-common';
 import {
   SearchOptions,
   SearchError,

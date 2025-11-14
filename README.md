@@ -1,4 +1,4 @@
-# Memory MCP
+# Zettel Memory
 
 > **v0.1.0** - Local-first persistent memory MCP server
 
@@ -22,13 +22,13 @@
 ### Installation
 
 ```bash
-npm install -g @memory-mcp/mcp-server
+npm install -g @inchan/zettel-memory
 ```
 
 Or use with `npx`:
 
 ```bash
-npx @memory-mcp/mcp-server --vault ~/my-vault
+npx @inchan/zettel-memory --vault ~/my-vault
 ```
 
 ### Claude Desktop Setup
@@ -41,7 +41,7 @@ Add to your Claude Desktop config (`~/.config/claude/claude_desktop_config.json`
     "memory": {
       "command": "npx",
       "args": [
-        "@memory-mcp/mcp-server",
+        "@inchan/zettel-memory",
         "--vault",
         "/Users/yourname/Documents/memory-vault"
       ]
@@ -70,7 +70,7 @@ links: []
 
 # My First Note
 
-This is my first note in Memory MCP!
+This is my first note in Zettel Memory!
 
 ## What I can do
 
@@ -83,7 +83,7 @@ EOF
 
 ## 📚 Available Tools (v0.1.0)
 
-Memory MCP provides 6 MCP tools for complete note management:
+Zettel Memory provides 6 MCP tools for complete note management:
 
 ### `create_note`
 Create a new Markdown note with Front Matter.
@@ -268,8 +268,8 @@ Your note content in Markdown...
 
 ```bash
 # Clone the repository
-git clone https://github.com/inchan/memory-mcp.git
-cd memory-mcp
+git clone https://github.com/inchan/zettel-memory.git
+cd zettel-memory
 
 # Install dependencies
 npm install
@@ -290,7 +290,7 @@ npm run lint
 ### Project Structure
 
 ```
-memory-mcp/
+zettel-memory/
 ├── packages/
 │   ├── mcp-server/      # MCP server & CLI
 │   ├── storage-md/      # Markdown storage & Front Matter
@@ -311,7 +311,7 @@ node packages/mcp-server/dist/cli.js --vault /tmp/test-vault --index /tmp/test-i
 npm start -- --vault /tmp/test-vault --index /tmp/test-index.db
 
 # Using npx (if published)
-npx @memory-mcp/mcp-server --vault ~/my-vault --index ~/.memory-index.db
+npx @inchan/zettel-memory --vault ~/my-vault --index ~/.memory-index.db
 ```
 
 **Subcommand (Backward Compatible):**
@@ -395,9 +395,9 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 📞 Support
 
-- 🐛 [Report a bug](https://github.com/inchan/memory-mcp/issues)
-- 💡 [Request a feature](https://github.com/inchan/memory-mcp/issues)
-- 💬 [Discussions](https://github.com/inchan/memory-mcp/discussions)
+- 🐛 [Report a bug](https://github.com/inchan/zettel-memory/issues)
+- 💡 [Request a feature](https://github.com/inchan/zettel-memory/issues)
+- 💬 [Discussions](https://github.com/inchan/zettel-memory/discussions)
 
 ---
 

@@ -1,5 +1,5 @@
 /**
- * @memory-mcp/mcp-server
+ * @inchan/zettel-memory
  * 버전 정보
  */
 

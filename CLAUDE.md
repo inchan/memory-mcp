@@ -7,7 +7,7 @@
 
 ## Quick Reference
 
-**Memory MCP (Olima + Basic-Memory + Zettelkasten + PARA)** - A TypeScript/Node.js based knowledge management system that exposes local persistent memory as an MCP server.
+**Zettel Memory (Olima + Basic-Memory + Zettelkasten + PARA)** - A TypeScript/Node.js based knowledge management system that exposes local persistent memory as an MCP server.
 
 ### Quick Start
 
@@ -21,7 +21,7 @@ npm test
 # Run MCP server
 npm start
 # or
-npx memory-mcp --vault ~/vault --index ~/.memory-index.db
+npx zettel-memory --vault ~/vault --index ~/.memory-index.db
 ```
 
 ### Technology Stack

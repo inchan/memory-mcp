@@ -11,7 +11,7 @@ import {
   MemoryMcpError,
 } from '../src';
 
-describe('@memory-mcp/common', () => {
+describe('@inchan/zettel-memory-common', () => {
   describe('UID generation', () => {
     it('generateUid()는 유효한 UID 형식을 생성해야 한다', () => {
       const uid = generateUid();

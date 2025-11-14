@@ -1,5 +1,5 @@
 /**
- * @memory-mcp/mcp-server
+ * @inchan/zettel-memory
  * MCP 인터페이스/툴 노출
  */
 

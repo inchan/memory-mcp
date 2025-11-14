@@ -8,7 +8,7 @@ import { createTestContext, cleanupTestContext } from '../test-helpers';
 import type { ToolExecutionContext } from '../../src/tools/types';
 import * as fs from 'fs';
 import * as path from 'path';
-import { loadNote, parseFrontMatter } from '@memory-mcp/storage-md';
+import { loadNote, parseFrontMatter } from '@inchan/zettel-memory-storage-md';
 
 describe('Storage Integration Tests', () => {
   let context: ToolExecutionContext;

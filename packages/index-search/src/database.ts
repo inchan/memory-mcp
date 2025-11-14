@@ -3,7 +3,7 @@
  */
 
 import DatabaseConstructor from 'better-sqlite3';
-import { logger } from '@memory-mcp/common';
+import { logger } from '@inchan/zettel-memory-common';
 import { IndexConfig, DatabaseError } from './types';
 import * as path from 'path';
 import * as fs from 'fs';

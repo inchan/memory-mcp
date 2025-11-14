@@ -5,7 +5,7 @@
 import { promises as fs, constants } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { logger } from '@memory-mcp/common';
+import { logger } from '@inchan/zettel-memory-common';
 import { FileSystemError, WriteFileOptions, ReadFileOptions } from './types';
 
 /**

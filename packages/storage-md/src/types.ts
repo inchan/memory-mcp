@@ -1,8 +1,8 @@
 /**
- * @memory-mcp/storage-md 내부 타입 정의
+ * @inchan/zettel-memory-storage-md 내부 타입 정의
  */
 
-import type { MarkdownNote } from '@memory-mcp/common';
+import type { MarkdownNote } from '@inchan/zettel-memory-common';
 
 /**
  * 파일 감시 이벤트 타입

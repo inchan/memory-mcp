@@ -1,7 +1,7 @@
 {
-  "name": "memory-mcp",
+  "name": "zettel-memory",
   "version": "0.0.1",
-  "description": "Memory MCP (Olima + Basic-Memory + Zettelkasten + PARA) - 로컬 퍼시스턴트 메모리를 MCP 서버로 노출",
+  "description": "Zettel Memory (Olima + Basic-Memory + Zettelkasten + PARA) - 로컬 퍼시스턴트 메모리를 MCP 서버로 노출",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -52,14 +52,14 @@
     "fts5",
     "knowledge-management"
   ],
-  "author": "Memory MCP Project",
+  "author": "Zettel Memory Project",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/inchan/memory-mcp.git"
+    "url": "https://github.com/inchan/zettel-memory.git"
   },
   "bugs": {
-    "url": "https://github.com/inchan/memory-mcp/issues"
+    "url": "https://github.com/inchan/zettel-memory/issues"
   },
-  "homepage": "https://github.com/inchan/memory-mcp#readme"
+  "homepage": "https://github.com/inchan/zettel-memory#readme"
 }

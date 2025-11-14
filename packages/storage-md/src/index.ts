@@ -1,5 +1,5 @@
 /**
- * @memory-mcp/storage-md
+ * @inchan/zettel-memory-storage-md
  * Markdown 파일 저장/로드와 Front Matter 처리
  */
 

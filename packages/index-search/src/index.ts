@@ -1,5 +1,5 @@
 /**
- * @memory-mcp/index-search
+ * @inchan/zettel-memory-index-search
  * FTS/그래프 인덱싱 & 검색
  */
 
