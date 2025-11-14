@@ -1,0 +1,33 @@
+# Test files
+__tests__/
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+test-helpers.ts
+
+# Source TypeScript files (we ship compiled JS only)
+src/
+
+# Build artifacts
+*.tsbuildinfo
+tsconfig.json
+
+# Development files
+.eslintrc*
+.prettierrc*
+jest.config.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Misc
+.DS_Store
+*.log
+npm-debug.log*
+.env
+.env.*
