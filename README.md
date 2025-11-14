@@ -81,7 +81,7 @@ This is my first note in Zettel Memory!
 EOF
 ```
 
-## 📚 Available Tools (v0.1.0)
+## 📚 Available Tools (v0.0.1)
 
 Zettel Memory provides 6 MCP tools for complete note management:
 

@@ -100,7 +100,7 @@ If you need to publish manually (e.g., from local machine):
 
 ### Prerequisites
 
-1. **npm account**: You need an npm account with access to the `@memory-mcp` scope
+1. **npm account**: You need an npm account with access to the `@inchankang` scope
 2. **Authentication**: Login to npm:
    ```bash
    npm login

@@ -111,13 +111,13 @@ jobs:
             ## Installation
 
             ```bash
-            npm install -g @memory-mcp/mcp-server@${{ needs.check-version.outputs.version }}
+            npm install -g @inchankang/zettel-memory@${{ needs.check-version.outputs.version }}
             ```
 
             ## Usage
 
             ```bash
-            npx @memory-mcp/mcp-server --vault ~/my-vault
+            npx @inchankang/zettel-memory --vault ~/my-vault
             ```
           draft: false
           prerelease: ${{ contains(needs.check-version.outputs.version, 'alpha') || contains(needs.check-version.outputs.version, 'beta') || contains(needs.check-version.outputs.version, 'rc') }}

@@ -28,7 +28,7 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'js', 'json'],
   moduleNameMapper: {
-    '^@memory-mcp/(.*)$': '<rootDir>/packages/$1/src'
+    '^@inchankang/zettel-memory-(.*)$': '<rootDir>/packages/$1/src'
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   verbose: true,

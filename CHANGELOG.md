@@ -11,6 +11,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Adjusted Jest coverage thresholds to realistic levels for v0.0.1 (30% lines, 25% branches/functions)
 - Updated README with current test coverage (37% statements, 155 tests)
 
+### Fixed
+- Fixed package name references in jest.config.js moduleNameMapper (@memory-mcp → @inchankang/zettel-memory)
+- Fixed GitHub Actions release workflow package names
+- Fixed packages/common/README.md to use correct package names and project name
+- Fixed DEPLOYMENT.md npm scope reference (@memory-mcp → @inchankang)
+- Fixed README.md Available Tools section version number (v0.1.0 → v0.0.1)
+
+### Added
+- Created docs/archive/README.md to document archived files and their historical context
+
+### Coverage Improvement Roadmap
+
+Current state (v0.0.1):
+- Overall: 37.34% statements, 30.93% branches, 27.77% functions, 37.02% lines
+- 155 tests passing, 1 skipped
+
+Coverage gaps identified:
+- CLI (packages/mcp-server/src/cli.ts): 0% coverage ❌
+- Server (packages/mcp-server/src/server.ts): 0% coverage ❌
+- Search Engine integration: 0% coverage ❌
+- Watcher: 13.79% coverage ⚠️
+- Link Graph: 20.97% coverage ⚠️
+
+**Target for v0.1.0: 50%+ overall coverage**
+
+Improvement plan:
+1. **Priority 1 (CLI)**: Add CLI argument parsing tests, help command tests, version command tests
+2. **Priority 2 (Server)**: Add MCP server initialization tests, tool registration tests, error handling tests
+3. **Priority 3 (Search)**: Add search engine integration tests, FTS5 query tests, ranking algorithm tests
+4. **Priority 4 (Watcher)**: Increase watcher tests from 13.79% to 40%+
+5. **Priority 5 (Link Graph)**: Increase link graph tests from 20.97% to 40%+
+
+Timeline: Target completion by v0.1.0 release
+
 ---
 
 ## [0.0.1] - 2025-11-14
