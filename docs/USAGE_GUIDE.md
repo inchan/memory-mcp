@@ -366,5 +366,5 @@ Markdown 형식으로 작성...
 
 ## 지원
 
-- GitHub Issues: https://github.com/inchan/memory-mcp/issues
+- GitHub Issues: https://github.com/inchan/zettel-memory/issues
 - 문서: `/docs`

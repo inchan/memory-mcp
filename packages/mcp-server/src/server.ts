@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * @inchan/zettel-memory
+ * @inchankang/zettel-memory
  * MCP 서버 구현 - JSON-RPC 2.0 기반 stdin/stdout 통신
  */
 
@@ -12,7 +12,7 @@ import {
   ListToolsRequestSchema,
   type CallToolRequest,
 } from "@modelcontextprotocol/sdk/types.js";
-import { ErrorCode, MemoryMcpError, logger } from "@inchan/zettel-memory-common";
+import { ErrorCode, MemoryMcpError, logger } from "@inchankang/zettel-memory-common";
 import {
   DEFAULT_EXECUTION_POLICY,
   executeTool,

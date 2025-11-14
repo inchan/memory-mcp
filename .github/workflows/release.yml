@@ -106,7 +106,7 @@ jobs:
           body: |
             Release v${{ needs.check-version.outputs.version }}
 
-            See [CHANGELOG.md](https://github.com/inchan/memory-mcp/blob/main/CHANGELOG.md) for details.
+            See [CHANGELOG.md](https://github.com/inchan/zettel-memory/blob/main/CHANGELOG.md) for details.
 
             ## Installation
 

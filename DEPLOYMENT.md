@@ -189,7 +189,7 @@ git push origin v0.1.0-alpha.0
 ```
 
 Then create a release on GitHub:
-1. Go to https://github.com/inchan/memory-mcp/releases/new
+1. Go to https://github.com/inchan/zettel-memory/releases/new
 2. Select the tag `v0.1.0-alpha.0`
 3. Title: `v0.1.0-alpha.0 - MVP Release`
 4. Copy content from CHANGELOG.md for release notes

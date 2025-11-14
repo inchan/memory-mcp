@@ -1,4 +1,4 @@
-import { ErrorCode } from "@inchan/zettel-memory-common";
+import { ErrorCode } from "@inchankang/zettel-memory-common";
 import { withExecutionPolicy } from "..";
 
 describe("withExecutionPolicy", () => {

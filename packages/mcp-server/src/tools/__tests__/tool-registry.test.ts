@@ -1,4 +1,4 @@
-import { ErrorCode } from "@inchan/zettel-memory-common";
+import { ErrorCode } from "@inchankang/zettel-memory-common";
 import { executeTool, listTools, type ToolExecutionContext } from "..";
 import * as fs from "fs";
 import * as path from "path";

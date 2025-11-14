@@ -1,5 +1,5 @@
 /**
- * @inchan/zettel-memory-common
+ * @inchankang/zettel-memory-common
  * 공통 스키마, 타입, 유틸리티 함수들
  */
 

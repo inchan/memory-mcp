@@ -1,5 +1,5 @@
 {
-  "name": "@inchan/zettel-memory",
+  "name": "@inchankang/zettel-memory",
   "version": "0.0.1",
   "description": "Local-first persistent memory MCP server with PARA + Zettelkasten + SQLite FTS5",
   "main": "dist/index.js",
@@ -17,10 +17,10 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@inchan/zettel-memory-assoc-engine": "^0.0.1",
-    "@inchan/zettel-memory-common": "^0.0.1",
-    "@inchan/zettel-memory-index-search": "^0.0.1",
-    "@inchan/zettel-memory-storage-md": "^0.0.1",
+    "@inchankang/zettel-memory-assoc-engine": "^0.0.1",
+    "@inchankang/zettel-memory-common": "^0.0.1",
+    "@inchankang/zettel-memory-index-search": "^0.0.1",
+    "@inchankang/zettel-memory-storage-md": "^0.0.1",
     "@modelcontextprotocol/sdk": "^1.18.2",
     "commander": "^11.1.0",
     "zod": "^3.25.76",

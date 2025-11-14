@@ -1,5 +1,5 @@
 {
-  "name": "@inchan/zettel-memory-index-search",
+  "name": "@inchankang/zettel-memory-index-search",
   "version": "0.0.1",
   "description": "FTS/그래프 인덱싱 & 검색",
   "private": true,
@@ -14,7 +14,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@inchan/zettel-memory-common": "^0.0.1",
+    "@inchankang/zettel-memory-common": "^0.0.1",
     "better-sqlite3": "^9.2.2"
   },
   "devDependencies": {

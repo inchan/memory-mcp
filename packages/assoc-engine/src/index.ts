@@ -1,5 +1,5 @@
 /**
- * @inchan/zettel-memory-assoc-engine
+ * @inchankang/zettel-memory-assoc-engine
  * 연상(Olima) 엔진
  */
 

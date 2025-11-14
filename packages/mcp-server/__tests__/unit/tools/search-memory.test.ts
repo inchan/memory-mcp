@@ -6,7 +6,7 @@ import { executeTool } from '../../../src/tools';
 import { SearchMemoryInputSchema } from '../../../src/tools/schemas';
 import { createTestContext, cleanupTestContext } from '../../test-helpers';
 import type { ToolExecutionContext } from '../../../src/tools/types';
-import { ErrorCode } from '@inchan/zettel-memory-common';
+import { ErrorCode } from '@inchankang/zettel-memory-common';
 
 describe('search_memory tool', () => {
   let context: ToolExecutionContext;

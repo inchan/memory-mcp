@@ -2,8 +2,8 @@
  * 통합 인덱스 & 검색 엔진
  */
 
-import { logger, MarkdownNote, normalizePath, IndexStats } from '@inchan/zettel-memory-common';
-import type { LinkGraphNode } from '@inchan/zettel-memory-common';
+import { logger, MarkdownNote, normalizePath, IndexStats } from '@inchankang/zettel-memory-common';
+import type { LinkGraphNode } from '@inchankang/zettel-memory-common';
 import { createHash } from 'crypto';
 import { DatabaseManager, type SqliteDatabase } from './database';
 import { FtsSearchEngine } from './fts-index';

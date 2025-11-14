@@ -8,7 +8,7 @@ import { createTestContext, cleanupTestContext } from '../../test-helpers';
 import type { ToolExecutionContext } from '../../../src/tools/types';
 import * as fs from 'fs';
 import * as path from 'path';
-import { ErrorCode } from '@inchan/zettel-memory-common';
+import { ErrorCode } from '@inchankang/zettel-memory-common';
 
 describe('create_note tool', () => {
   let context: ToolExecutionContext;

@@ -5,7 +5,7 @@
 import chokidar from 'chokidar';
 import path from 'path';
 import { EventEmitter } from 'events';
-import { debounce, logger } from '@inchan/zettel-memory-common';
+import { debounce, logger } from '@inchankang/zettel-memory-common';
 import { normalizePath } from './file-operations';
 import { loadNote } from './note-manager';
 import {

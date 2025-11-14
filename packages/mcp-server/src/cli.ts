@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 /**
- * @inchan/zettel-memory
+ * @inchankang/zettel-memory
  * CLI 진입점 - Commander.js 기반
  */
 
 import { Command } from "commander";
-import { logger } from "@inchan/zettel-memory-common";
+import { logger } from "@inchankang/zettel-memory-common";
 import { startServer, type MemoryMcpServerOptions } from "./server.js";
 
 const program = new Command();

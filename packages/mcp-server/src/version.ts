@@ -1,5 +1,5 @@
 /**
- * @inchan/zettel-memory
+ * @inchankang/zettel-memory
  * 버전 정보
  */
 

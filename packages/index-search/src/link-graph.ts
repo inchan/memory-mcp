@@ -2,7 +2,7 @@
  * 링크 그래프 관리 및 탐색 유틸리티
  */
 
-import { logger, MarkdownNote, normalizePath, parseAllLinks, LinkGraphNode } from '@inchan/zettel-memory-common';
+import { logger, MarkdownNote, normalizePath, parseAllLinks, LinkGraphNode } from '@inchankang/zettel-memory-common';
 import type { SqliteDatabase } from './database';
 import type {
   BacklinkOptions,

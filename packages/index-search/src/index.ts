@@ -1,5 +1,5 @@
 /**
- * @inchan/zettel-memory-index-search
+ * @inchankang/zettel-memory-index-search
  * FTS/그래프 인덱싱 & 검색
  */
 

@@ -1,4 +1,4 @@
-import { ParaCategorySchema } from '@inchan/zettel-memory-common';
+import { ParaCategorySchema } from '@inchankang/zettel-memory-common';
 import { z } from 'zod';
 
 export const SearchMemoryInputSchema = z

@@ -2,7 +2,7 @@
  * index-search 패키지 타입 정의
  */
 
-import { SearchResult } from '@inchan/zettel-memory-common';
+import { SearchResult } from '@inchankang/zettel-memory-common';
 
 /**
  * 검색 옵션

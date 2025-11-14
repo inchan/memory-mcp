@@ -1,4 +1,4 @@
-import { ErrorCode, MemoryMcpError } from '@inchan/zettel-memory-common';
+import { ErrorCode, MemoryMcpError } from '@inchankang/zettel-memory-common';
 
 type RetryHook = (_context: { attempt: number; error: unknown }) => void;
 

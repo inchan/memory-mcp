@@ -1,5 +1,5 @@
 {
-  "name": "@inchan/zettel-memory-common",
+  "name": "@inchankang/zettel-memory-common",
   "version": "0.0.1",
   "description": "공통 스키마, 타입, 유틸리티 함수들",
   "private": true,

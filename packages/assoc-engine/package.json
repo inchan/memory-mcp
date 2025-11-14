@@ -1,5 +1,5 @@
 {
-  "name": "@inchan/zettel-memory-assoc-engine",
+  "name": "@inchankang/zettel-memory-assoc-engine",
   "version": "0.0.1",
   "description": "연상(Olima) 엔진",
   "private": true,
@@ -14,7 +14,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@inchan/zettel-memory-common": "^0.0.1"
+    "@inchankang/zettel-memory-common": "^0.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.10.0"

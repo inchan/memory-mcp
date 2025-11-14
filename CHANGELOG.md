@@ -112,4 +112,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **v0.1.0**: 50%+ test coverage, performance benchmarks, file watcher
 - **v0.2.0**: Vector embeddings, Olima ranking engine, Docker image
 
-[0.0.1]: https://github.com/inchan/memory-mcp/releases/tag/v0.0.1
+[0.0.1]: https://github.com/inchan/zettel-memory/releases/tag/v0.0.1
