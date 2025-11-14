@@ -23,7 +23,9 @@ describe('MCP Protocol Compliance', () => {
     testIndexPath = path.join(os.tmpdir(), `mcp-test-index-${Date.now()}.db`);
 
     // 서버 프로세스 시작
-    const serverPath = path.join(__dirname, '..', 'dist', 'cli.js');
+    // __dirname: packages/mcp-server/__tests__/e2e
+    // serverPath: packages/mcp-server/dist/cli.js
+    const serverPath = path.join(__dirname, '..', '..', 'dist', 'cli.js');
 
     serverProcess = spawn('node', [
       serverPath,
@@ -57,10 +59,20 @@ describe('MCP Protocol Compliance', () => {
   afterAll(async () => {
     // 정리
     if (client) {
-      await client.close();
+      try {
+        await client.close();
+      } catch (error) {
+        console.error('Error closing client:', error);
+      }
     }
+
     if (serverProcess) {
-      serverProcess.kill();
+      serverProcess.kill('SIGTERM');
+      // Wait for process to exit
+      await new Promise((resolve) => {
+        serverProcess.once('exit', resolve);
+        setTimeout(resolve, 2000); // Fallback timeout
+      });
     }
 
     // 테스트 파일 정리
@@ -70,7 +82,7 @@ describe('MCP Protocol Compliance', () => {
     if (fs.existsSync(testIndexPath)) {
       fs.unlinkSync(testIndexPath);
     }
-  });
+  }, 10000);
 
   describe('서버 초기화 및 연결', () => {
     test('서버에 성공적으로 연결', () => {

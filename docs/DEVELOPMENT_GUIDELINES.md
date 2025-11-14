@@ -8,13 +8,27 @@ Development guidelines and best practices for this project.
 
 This project follows industry-standard software engineering principles:
 
+### 🎯 Validation First (최우선 원칙)
+> **"검증을 어떻게 할 것인가?"를 먼저 정의합니다.**
+
+- **Before Writing Code**: 코드 작성 전에 검증 방법부터 정의
+- **No Validation, No Code**: 검증 방법이 없으면 코드를 작성하지 않음
+- **Test-Driven Development**: 테스트를 먼저 작성 (Red-Green-Refactor)
+- **Automated Verification**: 모든 검증은 자동화 (CI/CD)
+- **Never Skip Validation**: 검증 실패 시 우회하지 않고 즉시 수정
+
+📖 **See**: [VALIDATION_STRATEGY.md](./VALIDATION_STRATEGY.md) for complete validation methodology
+
+---
+
+### Other Engineering Principles
+
 - **SOLID Principles**: Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion
 - **DRY (Don't Repeat Yourself)**: Extract repeated patterns into reusable components
 - **KISS (Keep It Simple)**: Favor simple solutions over complex ones
 - **YAGNI (You Aren't Gonna Need It)**: Implement only what's needed now
-- **TDD (Test-Driven Development)**: Write tests first, follow Red-Green-Refactor cycle
 
-For detailed explanations, Rust-specific examples, code review checklists, and refactoring patterns, see the [development-guidelines skill](../.claude/skills/development-guidelines/SKILL.md).
+For detailed explanations, TypeScript examples, code review checklists, and refactoring patterns, see the [development-guidelines skill](../.claude/skills/development-guidelines/SKILL.md).
 
 ---
 
@@ -68,40 +82,49 @@ SDD and TDD work together seamlessly:
 
 ### Example Workflow
 
-```rust
+```typescript
 // 1. RFC defines the interface
-// docs/specs/rfcs/0001-cli-interface.md:
+// docs/specs/rfcs/0001-search-interface.md:
 //
-// ```rust
-// pub struct SyncCommand {
-//     pub agent: Option<String>,
+// ```typescript
+// interface SearchQuery {
+//   query: string;
+//   filter?: { category?: string; tags?: string[] };
 // }
-// impl CommandHandler for SyncCommand {
-//     fn execute(&self) -> Result<()>;
+// interface SearchEngine {
+//   search(query: SearchQuery): Promise<SearchResult[]>;
 // }
 // ```
 
 // 2. Write failing test (Red)
-#[test]
-fn test_sync_executes_successfully() {
-    let cmd = SyncCommand { agent: None };
-    assert!(cmd.execute().is_ok());  // Fails - not implemented
-}
+describe('SearchEngine', () => {
+  it('should search and return results', async () => {
+    const engine = new SearchEngine(mockIndex);
+    const results = await engine.search({ query: 'test' });
+    expect(results).toHaveLength(1);  // Fails - not implemented
+  });
+});
 
 // 3. Minimal implementation (Green)
-impl CommandHandler for SyncCommand {
-    fn execute(&self) -> Result<()> {
-        Ok(())  // Test passes
-    }
+class SearchEngine implements SearchEngine {
+  async search(query: SearchQuery): Promise<SearchResult[]> {
+    return [];  // Test passes (after adjusting assertion)
+  }
 }
 
 // 4. Refactor with actual logic
-impl CommandHandler for SyncCommand {
-    fn execute(&self) -> Result<()> {
-        let config = ConfigManager::load()?;
-        self.sync_files(&config)?;
-        Ok(())
-    }
+class SearchEngine implements SearchEngine {
+  constructor(private index: FTSIndex) {}
+
+  async search(query: SearchQuery): Promise<SearchResult[]> {
+    const results = await this.index.query(query.query);
+    return this.applyFilters(results, query.filter);
+  }
+
+  private applyFilters(results: RawResult[], filter?: Filter): SearchResult[] {
+    // Apply filtering logic
+    return results.filter(r => this.matchesFilter(r, filter));
+  }
 }
 ```
 

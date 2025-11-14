@@ -1,6 +1,127 @@
-# MCP 서버 검증 체계 구축 - 다음 단계
+# 검증 Next Steps - Gap Analysis & Roadmap
 
-## 📋 완료된 작업
+> **최종 업데이트**: 2025-11-13
+> **핵심 원칙**: "검증을 어떻게 할 것인가?"를 실제 코드베이스에 적용
+
+---
+
+## 📊 현재 상태 분석 (2025-11-13)
+
+### 실제 측정 결과
+
+```bash
+# 테스트 커버리지
+npm run test:coverage
+→ 전체: 53.27% ❌ (목표: 80%+)
+
+# 테스트 결과
+→ 140 passed, 13 failed, 1 skipped
+```
+
+### ✅ 이미 구현된 검증
+
+1. **CI/CD 파이프라인** ✅
+   - `.github/workflows/ci.yml`: Lint + Type check + Unit/Integration
+   - `.github/workflows/performance.yml`: 주간 성능 테스트
+   - **Status**: 완료 but E2E 비활성화 ⚠️
+
+2. **테스트 인프라** ✅
+   - Jest 설정, 16개 테스트 파일
+   - Unit (6) + Integration (2) + E2E (1) + Performance (2)
+   - **Status**: 구현됨, 확장 필요 ⚠️
+
+3. **타입 검증 (Zod)** ✅
+   - 4개 파일, 59개 검증 포인트
+   - **Status**: 부분적, 확장 필요 ⚠️
+
+---
+
+## 🚨 Critical Gaps (문서 vs 실제)
+
+| 검증 레벨 | 목표 (VALIDATION_STRATEGY.md) | 현재 상태 | Gap |
+|----------|--------------------------|---------|-----|
+| **Level 1: 타입** | 모든 공개 인터페이스 | 4개 파일만 | ⚠️ 부분적 |
+| **Level 2: 단위** | 80%+ 커버리지 | **53.27%** | ❌ **-26.73%** |
+| **Level 3: 통합** | 패키지 간 경계 | 2개 파일 | ⚠️ 부족 |
+| **Level 4: E2E** | MCP 전체 시스템 | **비활성화** | ❌ **중단됨** |
+| **Level 5: 성능/보안** | KPI 자동 검증 | continue-on-error | ⚠️ 느슨함 |
+
+### 0% 커버리지 패키지 ❌❌❌
+```
+assoc-engine/src:      0.00%  (⚠️  아직 구현 안 됨 - TODO)
+mcp-server/src (CLI):  0.00%  (CLI 미검증)
+```
+
+**중요 발견 (2025-11-14)**:
+- `assoc-engine`: 실제 구현 없음, `export const PACKAGE_VERSION = '0.1.0';` 만 존재
+- **결론**: 테스트를 작성할 기능이 없음 → 구현 후 테스트 작성
+- **수정된 우선순위**: mcp-server CLI 테스트 먼저 작성
+
+### < 25% 커버리지 ❌❌
+```
+watcher:     13.79%  (파일 감시 미검증)
+link-graph:  20.97%  (링크 그래프 미검증)
+```
+
+---
+
+## 🎯 3주 실행 계획 (구체적, 측정 가능)
+
+### Week 1: Critical Issues
+**목표**: E2E 활성화 + 구현된 0% 코드 커버리지 제거
+
+- [x] **Day 1**: E2E stdio 이슈 수정, 재활성화 ✅
+  - 결과: 13/13 E2E 테스트 통과
+  - Commit: `a6a9bb4` - fix(e2e): fix E2E test path and re-enable in CI
+
+- [ ] **Day 2-3**: mcp-server CLI 테스트 (0% → 60%+)
+  - ⚠️  **수정**: assoc-engine → mcp-server CLI로 변경
+  - 이유: assoc-engine은 아직 구현되지 않음 (구현 후 테스트 작성)
+
+- [ ] **Day 4-5**: 실패한 테스트 수정 or watcher 테스트 시작
+  - 13개 실패 테스트 수정
+  - 또는 watcher 커버리지 향상 시작
+
+**검증**:
+```bash
+npm run test:e2e  # ✅ 통과 (완료)
+npm run test:coverage | grep "mcp-server/src"  # cli.ts, server.ts 60%+ 목표
+```
+
+---
+
+### Week 2: Coverage 80% 달성
+**목표**: 전체 커버리지 80%+
+
+- [ ] **Day 1-2**: watcher 테스트 (13% → 70%+)
+- [ ] **Day 3-4**: link-graph 테스트 (20% → 70%+)
+- [ ] **Day 5**: 실패한 13개 테스트 수정
+
+**검증**:
+```bash
+npm test  # 0 failures
+npm run test:coverage  # 80%+ 확인
+```
+
+---
+
+### Week 3: Hardening
+**목표**: 검증 자동화 강화
+
+- [ ] **Day 1**: Zod 검증 확장 (10개+ 파일)
+- [ ] **Day 2**: 성능 테스트 필수화 (continue-on-error → false)
+- [ ] **Day 3**: 보안 취약점 해결 (`npm audit`)
+- [ ] **Day 4-5**: 문서 업데이트 및 검증
+
+**검증**:
+```bash
+grep -r "from 'zod'" packages | wc -l  # 10+ 확인
+npm audit  # 0 high/critical
+```
+
+---
+
+## 📋 완료된 작업 (Historical Context)
 
 ### ✅ 1단계: MCP 표준 준수 검증 도구 선택 및 설정
 
