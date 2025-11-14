@@ -1,6 +1,6 @@
 {
   "name": "@memory-mcp/mcp-server",
-  "version": "0.1.0-alpha.0",
+  "version": "0.0.1",
   "description": "Local-first persistent memory MCP server with PARA + Zettelkasten + SQLite FTS5",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,10 +17,10 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@memory-mcp/assoc-engine": "^0.1.0-alpha.0",
-    "@memory-mcp/common": "^0.1.0-alpha.0",
-    "@memory-mcp/index-search": "^0.1.0-alpha.0",
-    "@memory-mcp/storage-md": "^0.1.0-alpha.0",
+    "@memory-mcp/assoc-engine": "^0.0.1",
+    "@memory-mcp/common": "^0.0.1",
+    "@memory-mcp/index-search": "^0.0.1",
+    "@memory-mcp/storage-md": "^0.0.1",
     "@modelcontextprotocol/sdk": "^1.18.2",
     "commander": "^11.1.0",
     "zod": "^3.25.76",

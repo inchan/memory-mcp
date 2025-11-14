@@ -1,6 +1,6 @@
 {
   "name": "memory-mcp",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Memory MCP (Olima + Basic-Memory + Zettelkasten + PARA) - 로컬 퍼시스턴트 메모리를 MCP 서버로 노출",
   "private": true,
   "workspaces": [
