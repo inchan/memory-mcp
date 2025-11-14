@@ -104,7 +104,8 @@ describe('create_note tool', () => {
       const result = CreateNoteInputSchema.safeParse(minimalInput);
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.category).toBe('Resources');
+        // v2: category is now optional (no default)
+        expect(result.data.category).toBeUndefined();
         expect(result.data.tags).toEqual([]);
       }
     });
@@ -256,6 +257,47 @@ describe('create_note tool', () => {
       ).rejects.toMatchObject({
         code: ErrorCode.SCHEMA_VALIDATION_ERROR,
       });
+    });
+  });
+
+  describe('Optional Category (v2 Schema)', () => {
+    it('should create note without category (Zettelkasten style)', async () => {
+      const input = {
+        title: 'Zettelkasten Note',
+        content: 'This note has no PARA category',
+      };
+
+      const result = await executeTool('create_note', input, context);
+
+      expect(result.content[0]?.type).toBe('text');
+      expect(result.isError).toBeUndefined();
+      expect(result.content[0]?.text).toContain('노트가 생성되었습니다');
+    });
+
+    it('should allow both categorized and uncategorized notes', async () => {
+      // Create note with category
+      const withCategory = await executeTool(
+        'create_note',
+        {
+          title: 'Categorized Note',
+          content: 'This has a category',
+          category: 'Projects',
+        },
+        context
+      );
+
+      // Create note without category
+      const withoutCategory = await executeTool(
+        'create_note',
+        {
+          title: 'Uncategorized Note',
+          content: 'This has no category',
+        },
+        context
+      );
+
+      expect(withCategory.isError).toBeUndefined();
+      expect(withoutCategory.isError).toBeUndefined();
     });
   });
 });

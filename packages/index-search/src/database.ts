@@ -10,8 +10,10 @@ import * as fs from 'fs';
 
 /**
  * 데이터베이스 스키마 버전
+ * v1: Initial schema
+ * v2: Make category optional (support Zettelkasten notes without PARA category)
  */
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 /**
  * 데이터베이스 관리자 클래스
@@ -150,7 +152,7 @@ export class DatabaseManager {
         CREATE TABLE notes (
           uid TEXT PRIMARY KEY,
           title TEXT NOT NULL,
-          category TEXT NOT NULL,
+          category TEXT, -- v2: Made optional for Zettelkasten notes
           file_path TEXT NOT NULL UNIQUE,
           project TEXT,
           tags TEXT, -- JSON 배열로 저장
@@ -248,6 +250,40 @@ export class DatabaseManager {
     switch (version) {
       case 1:
         // 초기 버전 - 마이그레이션 없음
+        break;
+      case 2:
+        // Make category column optional (NULL allowed)
+        logger.info('Migrating to v2: Making category optional');
+        this.db.exec(`
+          -- Create new table with optional category
+          CREATE TABLE notes_new (
+            uid TEXT PRIMARY KEY,
+            title TEXT NOT NULL,
+            category TEXT, -- v2: Made optional
+            file_path TEXT NOT NULL UNIQUE,
+            project TEXT,
+            tags TEXT,
+            content_hash TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            indexed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+          );
+
+          -- Copy data from old table
+          INSERT INTO notes_new
+          SELECT uid, title, category, file_path, project, tags, content_hash, created_at, updated_at, indexed_at
+          FROM notes;
+
+          -- Drop old table
+          DROP TABLE notes;
+
+          -- Rename new table
+          ALTER TABLE notes_new RENAME TO notes;
+        `);
+
+        // Recreate indexes
+        this.createIndexes();
+        logger.info('Migration to v2 completed successfully');
         break;
       // 향후 버전들의 마이그레이션 로직이 여기에 추가됩니다
       default:
