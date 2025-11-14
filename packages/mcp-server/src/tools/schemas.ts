@@ -46,7 +46,7 @@ export const CreateNoteInputSchema = z
         invalid_type_error: '내용은 문자열이어야 합니다.',
       })
       .min(1, '내용은 최소 1자 이상이어야 합니다.'),
-    category: ParaCategorySchema.default('Resources'),
+    category: ParaCategorySchema.optional(), // v2: Made optional for Zettelkasten notes
     tags: z
       .array(z.string().min(1, '태그는 최소 1자 이상이어야 합니다.'))
       .default([]),
