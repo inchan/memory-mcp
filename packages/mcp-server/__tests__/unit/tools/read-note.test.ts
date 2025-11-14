@@ -6,7 +6,7 @@ import { executeTool } from '../../../src/tools';
 import { ReadNoteInputSchema } from '../../../src/tools/schemas';
 import { createTestContext, cleanupTestContext } from '../../test-helpers';
 import type { ToolExecutionContext } from '../../../src/tools/types';
-import { ErrorCode } from '@memory-mcp/common';
+import { ErrorCode } from '@inchan/zettel-memory-common';
 
 describe('read_note tool', () => {
   let context: ToolExecutionContext;

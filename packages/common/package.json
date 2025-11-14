@@ -1,5 +1,5 @@
 {
-  "name": "@memory-mcp/common",
+  "name": "@inchan/zettel-memory-common",
   "version": "0.0.1",
   "description": "공통 스키마, 타입, 유틸리티 함수들",
   "private": true,
@@ -20,7 +20,7 @@
     "@types/node": "^20.10.0"
   },
   "keywords": [
-    "memory-mcp",
+    "zettel-memory",
     "common",
     "schemas",
     "types"

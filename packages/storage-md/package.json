@@ -1,5 +1,5 @@
 {
-  "name": "@memory-mcp/storage-md",
+  "name": "@inchan/zettel-memory-storage-md",
   "version": "0.0.1",
   "description": "Markdown 파일 저장/로드와 Front Matter 처리",
   "private": true,
@@ -14,7 +14,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@memory-mcp/common": "^0.0.1",
+    "@inchan/zettel-memory-common": "^0.0.1",
     "gray-matter": "^4.0.3",
     "remark": "^14.0.3",
     "chokidar": "^3.5.3"
@@ -26,7 +26,7 @@
     "@types/jest": "^29.5.8"
   },
   "keywords": [
-    "memory-mcp",
+    "zettel-memory",
     "storage",
     "markdown",
     "front-matter"

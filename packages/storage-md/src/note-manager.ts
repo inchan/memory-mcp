@@ -9,7 +9,7 @@ import {
   parseAllLinks,
   extractBacklinkContext,
   logger
-} from '@memory-mcp/common';
+} from '@inchan/zettel-memory-common';
 import {
   readFile,
   writeFile,

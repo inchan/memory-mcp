@@ -10,7 +10,7 @@ import {
   maskSensitiveInfo,
   generateUid,
   type Uid,
-} from '@memory-mcp/common';
+} from '@inchan/zettel-memory-common';
 import {
   createNewNote,
   saveNote,
@@ -22,8 +22,8 @@ import {
   analyzeLinks,
   updateFrontMatter,
   deleteFile,
-} from '@memory-mcp/storage-md';
-import { IndexSearchEngine } from '@memory-mcp/index-search';
+} from '@inchan/zettel-memory-storage-md';
+import { IndexSearchEngine } from '@inchan/zettel-memory-index-search';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   CreateNoteInputSchema,

@@ -1,11 +1,11 @@
 {
-  "name": "@memory-mcp/mcp-server",
+  "name": "@inchan/zettel-memory",
   "version": "0.0.1",
   "description": "Local-first persistent memory MCP server with PARA + Zettelkasten + SQLite FTS5",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "memory-mcp": "dist/cli.js"
+    "zettel-memory": "dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
@@ -17,10 +17,10 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@memory-mcp/assoc-engine": "^0.0.1",
-    "@memory-mcp/common": "^0.0.1",
-    "@memory-mcp/index-search": "^0.0.1",
-    "@memory-mcp/storage-md": "^0.0.1",
+    "@inchan/zettel-memory-assoc-engine": "^0.0.1",
+    "@inchan/zettel-memory-common": "^0.0.1",
+    "@inchan/zettel-memory-index-search": "^0.0.1",
+    "@inchan/zettel-memory-storage-md": "^0.0.1",
     "@modelcontextprotocol/sdk": "^1.18.2",
     "commander": "^11.1.0",
     "zod": "^3.25.76",
@@ -44,17 +44,17 @@
     "note-taking",
     "pkm"
   ],
-  "author": "Memory MCP Project",
+  "author": "Zettel Memory Project",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/inchan/memory-mcp.git",
+    "url": "https://github.com/inchan/zettel-memory.git",
     "directory": "packages/mcp-server"
   },
   "bugs": {
-    "url": "https://github.com/inchan/memory-mcp/issues"
+    "url": "https://github.com/inchan/zettel-memory/issues"
   },
-  "homepage": "https://github.com/inchan/memory-mcp#readme",
+  "homepage": "https://github.com/inchan/zettel-memory#readme",
   "engines": {
     "node": ">=18.0.0"
   },

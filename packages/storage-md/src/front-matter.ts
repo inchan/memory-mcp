@@ -10,7 +10,7 @@ import {
   MarkdownNote,
   generateUid,
   logger
-} from '@memory-mcp/common';
+} from '@inchan/zettel-memory-common';
 import {
   FrontMatterValidationError,
   UpdateFrontMatterOptions,

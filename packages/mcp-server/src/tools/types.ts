@@ -1,5 +1,5 @@
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import type { logger as baseLogger } from '@memory-mcp/common';
+import type { logger as baseLogger } from '@inchan/zettel-memory-common';
 import type { z } from 'zod';
 import type { ExecutionPolicyOptions } from './execution-policy.js';
 import type { ToolName } from './schemas.js';
