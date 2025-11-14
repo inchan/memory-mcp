@@ -42,6 +42,7 @@ export function removeExtension(filePath: string): string {
 
 /**
  * Markdown 링크 파싱 ([[링크]], [텍스트](링크))
+ * @deprecated parseAllLinks() 사용을 권장합니다
  */
 export function parseMarkdownLinks(content: string): string[] {
   const wikiLinks = Array.from(content.matchAll(/\[\[([^\]]+)\]\]/g))
@@ -53,6 +54,77 @@ export function parseMarkdownLinks(content: string): string[] {
     .filter((link): link is string => Boolean(link));
 
   return [...new Set([...wikiLinks, ...mdLinks])];
+}
+
+/**
+ * Wiki-style 링크만 파싱 - [[노트제목]] 또는 [[노트ID]] 형식
+ *
+ * 지원 형식:
+ * - [[노트제목]]
+ * - [[노트ID]]
+ * - [[링크|표시텍스트]] - 파이프 앞부분만 추출
+ *
+ * @param content - 파싱할 텍스트 내용
+ * @returns 파싱된 Wiki 링크 배열 (중복 제거됨)
+ */
+export function parseWikiLinks(content: string): string[] {
+  const wikiLinkRegex = /\[\[([^\]]+)\]\]/g;
+  const links: string[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = wikiLinkRegex.exec(content)) !== null) {
+    const linkText = match[1]?.trim();
+    if (!linkText) continue;
+
+    // [[링크|표시텍스트]] 형식 처리 - 파이프 앞부분만 추출
+    const pipeIndex = linkText.indexOf('|');
+    const actualLink = pipeIndex > -1
+      ? linkText.substring(0, pipeIndex).trim()
+      : linkText;
+
+    // 빈 링크 무시
+    if (actualLink) {
+      links.push(actualLink);
+    }
+  }
+
+  // 중복 제거
+  return Array.from(new Set(links));
+}
+
+/**
+ * 표준 Markdown 링크만 파싱 - [텍스트](url) 형식
+ *
+ * @param content - 파싱할 텍스트 내용
+ * @returns 파싱된 Markdown 링크 배열 (중복 제거됨)
+ */
+export function parseStandardMarkdownLinks(content: string): string[] {
+  const links = Array.from(content.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g))
+    .map(match => match[2]?.trim())
+    .filter((link): link is string => Boolean(link));
+
+  return Array.from(new Set(links));
+}
+
+/**
+ * 모든 링크 파싱 (Wiki + Markdown)
+ *
+ * @param content - 파싱할 텍스트 내용
+ * @returns 링크 타입별로 분류된 결과
+ */
+export function parseAllLinks(content: string): {
+  wiki: string[];
+  markdown: string[];
+  all: string[];
+} {
+  const wikiLinks = parseWikiLinks(content);
+  const markdownLinks = parseStandardMarkdownLinks(content);
+
+  return {
+    wiki: wikiLinks,
+    markdown: markdownLinks,
+    all: Array.from(new Set([...wikiLinks, ...markdownLinks])),
+  };
 }
 
 /**
@@ -205,3 +277,73 @@ class Logger {
  * 글로벌 로거 인스턴스
  */
 export const logger = new Logger();
+
+/**
+ * 백링크 문맥 추출
+ *
+ * @param content - 노트 내용
+ * @param linkText - 검색할 링크 텍스트 (노트 제목 또는 UID)
+ * @param contextLines - 앞뒤로 포함할 라인 수 (기본: 2)
+ * @returns 문맥 스니펫 배열
+ */
+export function extractBacklinkContext(
+  content: string,
+  linkText: string,
+  contextLines: number = 2
+): Array<{ snippet: string; lineNumber: number; linkType: 'wiki' | 'markdown' }> {
+  const lines = content.split('\n');
+  const results: Array<{ snippet: string; lineNumber: number; linkType: 'wiki' | 'markdown' }> = [];
+
+  // Wiki 링크 패턴: [[linkText]] 또는 [[linkText|display]]
+  const wikiPattern = new RegExp(`\\[\\[(?:${escapeRegex(linkText)}(?:\\|[^\\]]+)?)\\]\\]`, 'gi');
+
+  // Markdown 링크 패턴: [text](linkText)
+  const mdPattern = new RegExp(`\\[[^\\]]+\\]\\(${escapeRegex(linkText)}\\)`, 'gi');
+
+  lines.forEach((line, index) => {
+    const lineNumber = index + 1;
+    let foundMatch = false;
+
+    // Check for Wiki links
+    if (wikiPattern.test(line)) {
+      foundMatch = true;
+      const start = Math.max(0, index - contextLines);
+      const end = Math.min(lines.length, index + contextLines + 1);
+      const snippet = lines.slice(start, end).join('\n');
+
+      results.push({
+        snippet: snippet.trim(),
+        lineNumber,
+        linkType: 'wiki'
+      });
+    }
+
+    // Reset regex lastIndex
+    wikiPattern.lastIndex = 0;
+
+    // Check for Markdown links
+    if (mdPattern.test(line) && !foundMatch) {
+      const start = Math.max(0, index - contextLines);
+      const end = Math.min(lines.length, index + contextLines + 1);
+      const snippet = lines.slice(start, end).join('\n');
+
+      results.push({
+        snippet: snippet.trim(),
+        lineNumber,
+        linkType: 'markdown'
+      });
+    }
+
+    // Reset regex lastIndex
+    mdPattern.lastIndex = 0;
+  });
+
+  return results;
+}
+
+/**
+ * 정규식 특수문자 이스케이프
+ */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}

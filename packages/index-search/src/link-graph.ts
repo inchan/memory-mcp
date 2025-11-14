@@ -2,7 +2,7 @@
  * 링크 그래프 관리 및 탐색 유틸리티
  */
 
-import { logger, MarkdownNote, normalizePath, parseMarkdownLinks, LinkGraphNode } from '@memory-mcp/common';
+import { logger, MarkdownNote, normalizePath, parseAllLinks, LinkGraphNode } from '@memory-mcp/common';
 import type { SqliteDatabase } from './database';
 import type {
   BacklinkOptions,
@@ -181,7 +181,9 @@ export class LinkGraphEngine {
       addLink(link);
     }
 
-    for (const link of parseMarkdownLinks(note.content)) {
+    // Parse both Wiki links and Markdown links from content
+    const parsedLinks = parseAllLinks(note.content);
+    for (const link of parsedLinks.all) {
       addLink(link);
     }
 

@@ -258,7 +258,7 @@ const createNoteDefinition: ToolDefinition<typeof CreateNoteInputSchema> = {
 
 **ID**: ${note.frontMatter.id}
 **제목**: ${note.frontMatter.title}
-**카테고리**: ${note.frontMatter.category}
+**카테고리**: ${note.frontMatter.category || '(없음)'}
 **태그**: ${note.frontMatter.tags.join(', ') || '(없음)'}
 **프로젝트**: ${note.frontMatter.project || '(없음)'}
 **파일**: ${path.basename(note.filePath)}
@@ -269,7 +269,7 @@ const createNoteDefinition: ToolDefinition<typeof CreateNoteInputSchema> = {
           metadata: {
             id: note.frontMatter.id,
             title: note.frontMatter.title,
-            category: note.frontMatter.category,
+            category: note.frontMatter.category || null,
             tags: note.frontMatter.tags,
             project: note.frontMatter.project || null,
             filePath: note.filePath,
@@ -333,7 +333,7 @@ const readNoteDefinition: ToolDefinition<typeof ReadNoteInputSchema> = {
       let responseText = `# ${note.frontMatter.title}
 
 **ID**: ${note.frontMatter.id}
-**카테고리**: ${note.frontMatter.category}
+**카테고리**: ${note.frontMatter.category || '(없음)'}
 **태그**: ${note.frontMatter.tags.join(', ') || '(없음)'}
 **프로젝트**: ${note.frontMatter.project || '(없음)'}
 **생성**: ${note.frontMatter.created}
@@ -348,7 +348,7 @@ ${note.content}`;
       const metadata: any = {
         id: note.frontMatter.id,
         title: note.frontMatter.title,
-        category: note.frontMatter.category,
+        category: note.frontMatter.category || null,
         tags: note.frontMatter.tags,
         project: note.frontMatter.project || null,
         created: note.frontMatter.created,
@@ -563,7 +563,7 @@ const listNotesDefinition: ToolDefinition<typeof ListNotesInputSchema> = {
       paginatedNotes.forEach((note: any, index: number) => {
         responseText += `${offset + index + 1}. **${note.frontMatter.title}**
    - ID: \`${note.frontMatter.id}\`
-   - 카테고리: ${note.frontMatter.category}
+   - 카테고리: ${note.frontMatter.category || '(없음)'}
    - 태그: ${note.frontMatter.tags.join(', ') || '(없음)'}
    - 업데이트: ${note.frontMatter.updated}
    - 링크: ${note.frontMatter.links.length}개
@@ -710,7 +710,7 @@ const updateNoteDefinition: ToolDefinition<typeof UpdateNoteInputSchema> = {
 
 **UID**: ${uid}
 **제목**: ${updatedNote.frontMatter.title}
-**카테고리**: ${updatedNote.frontMatter.category}
+**카테고리**: ${updatedNote.frontMatter.category || '(없음)'}
 **태그**: ${updatedNote.frontMatter.tags.join(', ') || '(없음)'}
 **프로젝트**: ${updatedNote.frontMatter.project || '(없음)'}
 **링크**: ${updatedNote.frontMatter.links.length}개
@@ -723,7 +723,7 @@ const updateNoteDefinition: ToolDefinition<typeof UpdateNoteInputSchema> = {
           metadata: {
             uid,
             title: updatedNote.frontMatter.title,
-            category: updatedNote.frontMatter.category,
+            category: updatedNote.frontMatter.category || null,
             tags: updatedNote.frontMatter.tags,
             project: updatedNote.frontMatter.project || null,
             updated: updatedNote.frontMatter.updated,

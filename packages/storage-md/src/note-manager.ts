@@ -6,7 +6,8 @@ import {
   MarkdownNote,
   FrontMatter,
   Uid,
-  parseMarkdownLinks,
+  parseAllLinks,
+  extractBacklinkContext,
   logger
 } from '@memory-mcp/common';
 import {
@@ -264,8 +265,9 @@ export async function analyzeLinks(
   try {
     logger.debug(`링크 분석 시작: ${note.frontMatter.id}`);
 
-    // 아웃바운드 링크 파싱
-    const outboundLinks = parseMarkdownLinks(note.content);
+    // 아웃바운드 링크 파싱 (Wiki + Markdown 모두)
+    const linksParsed = parseAllLinks(note.content);
+    const outboundLinks = linksParsed.all;
 
     // 인바운드 링크 검색 (백링크)
     const inboundLinks = await findBacklinks(note.frontMatter.id, vaultPath);
@@ -288,7 +290,9 @@ export async function analyzeLinks(
     logger.debug(`링크 분석 완료: ${note.frontMatter.id}`, {
       outbound: outboundLinks.length,
       inbound: inboundLinks.length,
-      broken: brokenLinks.length
+      broken: brokenLinks.length,
+      wikiLinks: linksParsed.wiki.length,
+      markdownLinks: linksParsed.markdown.length,
     });
 
     return analysis;
@@ -320,20 +324,27 @@ async function findBacklinks(
       try {
         const note = await loadNote(filePath, { validateFrontMatter: false });
 
-        // 해당 노트가 targetUid를 링크하고 있는지 확인
-        const links = parseMarkdownLinks(note.content);
+        // 해당 노트가 targetUid를 링크하고 있는지 확인 (Wiki + Markdown)
+        const parsedLinks = parseAllLinks(note.content);
 
-        if (links.includes(targetUid)) {
-          // 링크 컨텍스트 추출
-          const context = extractLinkContext(note.content, targetUid);
+        if (parsedLinks.all.includes(targetUid)) {
+          // 링크 컨텍스트 추출 (새 함수 사용)
+          const contexts = extractBacklinkContext(note.content, targetUid);
 
-          backlinks.push({
+          // 각 문맥마다 백링크 추가
+          const backlink: BacklinkInfo = {
             sourceUid: note.frontMatter.id,
             sourceFilePath: filePath,
             sourceTitle: note.frontMatter.title,
             linkText: targetUid,
-            context,
-          });
+          };
+
+          // 컨텍스트가 있으면 추가
+          if (contexts.length > 0 && contexts[0]) {
+            backlink.context = contexts[0].snippet;
+          }
+
+          backlinks.push(backlink);
         }
 
       } catch (error) {
@@ -349,40 +360,6 @@ async function findBacklinks(
     logger.error(`백링크 검색 실패: ${targetUid}`, error);
     return [];
   }
-}
-
-/**
- * 링크 주변 컨텍스트 추출
- */
-function extractLinkContext(content: string, linkUid: string): string {
-  const lines = content.split('\n');
-  const contextLines: string[] = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    if (line && line.includes(linkUid)) {
-      // 앞뒤 1줄씩 포함하여 컨텍스트 생성
-      const start = Math.max(0, i - 1);
-      const end = Math.min(lines.length - 1, i + 1);
-
-      for (let j = start; j <= end; j++) {
-        const currentLine = lines[j];
-        if (currentLine) {
-          if (j === i) {
-            // 링크가 있는 줄은 강조
-            contextLines.push(`> ${currentLine}`);
-          } else {
-            contextLines.push(currentLine);
-          }
-        }
-      }
-
-      break; // 첫 번째 매칭만 사용
-    }
-  }
-
-  return contextLines.join('\n').trim();
 }
 
 /**
@@ -421,7 +398,7 @@ export function createNewNote(
   title: string,
   content: string = '',
   filePath: string,
-  category: FrontMatter['category'] = 'Resources',
+  category?: FrontMatter['category'],
   additionalFrontMatter?: Partial<FrontMatter>
 ): MarkdownNote {
   try {

@@ -85,7 +85,7 @@ describe('@memory-mcp/common', () => {
       const validFrontMatter = {
         id: '20250927T103000123456Z',
         title: '테스트 노트',
-        category: 'Resources' as const,
+        category: 'Resources',
         tags: ['test'],
         created: '2025-09-27T10:30:00Z',
         updated: '2025-09-27T10:30:00Z',

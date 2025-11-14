@@ -83,3 +83,31 @@ export interface PerformanceMetrics {
   memoryUsageMb: number;
   timestamp: string;
 }
+
+/**
+ * 백링크 문맥 정보
+ */
+export interface BacklinkContext {
+  /** 백링크 소스 노트 UID */
+  sourceUid: string;
+  /** 백링크 소스 노트 제목 */
+  sourceTitle: string;
+  /** 링크가 나타난 문맥 (앞뒤 텍스트) */
+  contextSnippet: string;
+  /** 링크가 나타난 라인 번호 */
+  lineNumber?: number;
+  /** 링크 타입 (wiki/markdown) */
+  linkType: 'wiki' | 'markdown';
+}
+
+/**
+ * 백링크 검색 결과
+ */
+export interface BacklinkResult {
+  /** 타겟 노트 UID */
+  targetUid: string;
+  /** 백링크 목록 */
+  backlinks: BacklinkContext[];
+  /** 총 백링크 수 */
+  totalCount: number;
+}

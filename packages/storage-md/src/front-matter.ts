@@ -28,22 +28,26 @@ interface ParseResult {
 
 /**
  * Front Matter 기본값 생성
+ * @param title - 노트 제목
+ * @param category - PARA 카테고리 (선택 사항, 없으면 Zettelkasten 폴더에 저장됨)
  */
 function createDefaultFrontMatter(
   title: string,
-  category: FrontMatter['category'] = 'Resources'
+  category?: FrontMatter['category']
 ): Partial<FrontMatter> {
   const now = new Date().toISOString();
 
-  return {
+  const base = {
     id: generateUid(),
     title: title || 'Untitled',
-    category,
     tags: [],
     created: now,
     updated: now,
     links: [],
   };
+
+  // category가 제공된 경우에만 추가
+  return category ? { ...base, category } : base;
 }
 
 /**
@@ -364,7 +368,7 @@ export function removeTagFromFrontMatter(
  */
 export function generateFrontMatterFromTitle(
   title: string,
-  category: FrontMatter['category'] = 'Resources',
+  category?: FrontMatter['category'],
   additionalData?: Partial<FrontMatter>
 ): FrontMatter {
   const defaultFM = createDefaultFrontMatter(title, category);

@@ -129,7 +129,7 @@ Content here`;
     // 비엄격 모드에서는 기본값으로 처리
     const result = parseFrontMatter(invalidContent, 'test.md', false);
     expect(result.frontMatter.title).toBe('Untitled');
-    expect(result.frontMatter.category).toBe('Resources');
+    expect(result.frontMatter.category).toBeUndefined();
   });
 });
 

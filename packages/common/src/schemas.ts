@@ -10,7 +10,7 @@ export const PARA_CATEGORIES = [
   'Archives',
 ] as const;
 
-export const ParaCategorySchema = z.enum(PARA_CATEGORIES);
+export const ParaCategorySchema = z.enum(PARA_CATEGORIES).optional();
 export type ParaCategory = z.infer<typeof ParaCategorySchema>;
 
 /**
