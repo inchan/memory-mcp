@@ -1,6 +1,6 @@
-# Memory MCP 사용 가이드
+# Zettel Memory 사용 가이드
 
-Memory MCP는 로컬 Markdown 기반 지식 베이스를 MCP(Model Context Protocol)를 통해 Claude와 연동하는 서버입니다.
+Zettel Memory는 로컬 Markdown 기반 지식 베이스를 MCP(Model Context Protocol)를 통해 Claude와 연동하는 서버입니다.
 
 ## 빠른 시작
 
@@ -21,19 +21,19 @@ code ~/Library/Application\ Support/Claude/claude_desktop_config.json
 code %APPDATA%\Claude\claude_desktop_config.json
 ```
 
-#### Step 3: Memory MCP 서버 추가
+#### Step 3: Zettel Memory 서버 추가
 
 ```json
 {
   "mcpServers": {
-    "memory-mcp": {
+    "zettel-memory": {
       "command": "node",
       "args": [
-        "/Users/inchan/workspace/pilot/memory-mcp/packages/mcp-server/dist/cli.js",
+        "/path/to/zettel-memory/packages/mcp-server/dist/cli.js",
         "--vault",
-        "/Users/inchan/Documents/vault",
+        "/Users/yourname/Documents/vault",
         "--index",
-        "/Users/inchan/.memory-mcp/index.db"
+        "/Users/yourname/.zettel-memory/index.db"
       ]
     }
   }
@@ -61,23 +61,23 @@ Claude Desktop 좌측 하단에 🔌 아이콘이 표시되면 연결 성공!
 **직접 실행 (루트 레벨 옵션):**
 ```bash
 # ✅ Claude Desktop 호환 (권장)
-node packages/mcp-server/dist/cli.js --vault ~/Documents/vault --index ~/.memory-mcp/index.db
+node packages/mcp-server/dist/cli.js --vault ~/Documents/vault --index ~/.zettel-memory/index.db
 
 # 또는 npm 사용
-npm start -- --vault ~/Documents/vault --index ~/.memory-mcp/index.db
+npm start -- --vault ~/Documents/vault --index ~/.zettel-memory/index.db
 ```
 
 **서브커맨드 방식 (하위 호환):**
 ```bash
 # ⚠️ 하위 호환성을 위해 지원되지만 권장하지 않음
-node packages/mcp-server/dist/cli.js server --vault ~/Documents/vault --index ~/.memory-mcp/index.db
+node packages/mcp-server/dist/cli.js server --vault ~/Documents/vault --index ~/.zettel-memory/index.db
 ```
 
 #### 헬스체크
 ```bash
 node packages/mcp-server/dist/cli.js healthcheck \
   --vault ~/Documents/vault \
-  --index ~/.memory-mcp/index.db
+  --index ~/.zettel-memory/index.db
 ```
 
 #### 사용 가능한 옵션
@@ -110,7 +110,7 @@ Claude Desktop에서:
 3. 자율성
 ```
 
-→ Memory MCP의 `create_note` 도구가 자동 호출됩니다.
+→ Zettel Memory의 `create_note` 도구가 자동 호출됩니다.
 
 ### 2. 노트 검색
 
@@ -290,7 +290,7 @@ Markdown 형식으로 작성...
 ├── para-방법론-20251113T124827295003Z.md
 └── memory-mcp-프로젝트-20251113T124827297005Z.md
 
-~/.memory-mcp/
+~/.zettel-memory/
 └── index.db    # SQLite FTS5 인덱스
 ```
 
@@ -306,11 +306,11 @@ Markdown 형식으로 작성...
 
 2. **경로가 절대 경로인지 확인**
    - ❌ `./packages/mcp-server/dist/cli.js`
-   - ✅ `/Users/inchan/workspace/pilot/memory-mcp/packages/mcp-server/dist/cli.js`
+   - ✅ `/path/to/zettel-memory/packages/mcp-server/dist/cli.js`
 
 3. **빌드가 완료되었는지 확인**
    ```bash
-   cd /Users/inchan/workspace/pilot/memory-mcp
+   cd /path/to/zettel-memory
    npm run build
    ls packages/mcp-server/dist/cli.js
    ```
@@ -322,7 +322,7 @@ Markdown 형식으로 작성...
 
 1. **인덱스 경로 확인**
    ```bash
-   ls -la ~/.memory-mcp/index.db
+   ls -la ~/.zettel-memory/index.db
    ```
 
 2. **노트가 인덱싱되었는지 확인**
@@ -361,8 +361,10 @@ Markdown 형식으로 작성...
 ## 다음 단계
 
 - 📖 [기술 사양서](./TECHNICAL_SPEC.md)
-- 🗺️ [로드맵](./MVP_ROADMAP_3MONTHS.md)
+- 🗺️ [로드맵](./ROADMAP.md)
 - 🏗️ [아키텍처](./ARCHITECTURE.md)
+- 🎯 [프로젝트 목표](./GOALS.md)
+- ✅ [검증 전략](./VALIDATION_STRATEGY.md)
 
 ## 지원
 
