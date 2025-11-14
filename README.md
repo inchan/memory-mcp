@@ -1,6 +1,6 @@
 # Zettel Memory
 
-> **v0.1.0** - Local-first persistent memory MCP server
+> **v0.0.1** - Local-first persistent memory MCP server
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
@@ -81,7 +81,7 @@ This is my first note in Zettel Memory!
 EOF
 ```
 
-## 📚 Available Tools (v0.1.0)
+## 📚 Available Tools (v0.0.1)
 
 Zettel Memory provides 6 MCP tools for complete note management:
 
@@ -339,15 +339,17 @@ node packages/mcp-server/dist/cli.js healthcheck --vault /tmp/test-vault --index
 
 ## 📖 Documentation
 
-- [`docs/MVP_ROADMAP_3MONTHS.md`](docs/MVP_ROADMAP_3MONTHS.md) - 3-month development roadmap
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) - Epic/feature tree structure
 - [`docs/TECHNICAL_SPEC.md`](docs/TECHNICAL_SPEC.md) - Technical stack & KPIs
 - [`docs/GOALS.md`](docs/GOALS.md) - Project goals & milestones
-- [`DEVELOPMENT_GUIDELINES.md`](docs/DEVELOPMENT_GUIDELINES.md) - Development principles (SOLID, TDD, SDD)
+- [`docs/DEVELOPMENT_GUIDELINES.md`](docs/DEVELOPMENT_GUIDELINES.md) - Development principles (SOLID, TDD, SDD)
+- [`docs/VALIDATION_STRATEGY.md`](docs/VALIDATION_STRATEGY.md) - Validation strategy and methodology
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - System architecture
+- [`docs/USAGE_GUIDE.md`](docs/USAGE_GUIDE.md) - Usage guide and CLI reference
 
 ## 🗺️ Roadmap
 
-### v0.1.0 (Current) ✅
+### v0.0.1 (Current) ✅
 - [x] Complete CRUD operations (create/read/update/delete/list/search)
 - [x] Markdown + Front Matter storage
 - [x] PARA categorization
@@ -355,9 +357,9 @@ node packages/mcp-server/dist/cli.js healthcheck --vault /tmp/test-vault --index
 - [x] Link analysis & backlinks
 - [x] CLI interface
 - [x] MCP server integration
-- [x] Basic test coverage (24%)
+- [x] Test coverage: 37% (155 tests passing)
 
-### v0.2.0 (Next)
+### v0.1.0 (Next)
 - [ ] Comprehensive unit tests (50%+ coverage)
 - [ ] Performance benchmarks & KPI validation
 - [ ] Zettelkasten link auto-suggestions

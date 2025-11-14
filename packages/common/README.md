@@ -1,6 +1,6 @@
-# @memory-mcp/common
+# @inchankang/zettel-memory-common
 
-Memory MCP 시스템의 공통 스키마, 타입, 유틸리티 함수들을 제공하는 패키지입니다.
+Zettel Memory 시스템의 공통 스키마, 타입, 유틸리티 함수들을 제공하는 패키지입니다.
 
 ## 주요 기능
 
@@ -12,7 +12,7 @@ Memory MCP 시스템의 공통 스키마, 타입, 유틸리티 함수들을 제�
 ## 설치
 
 ```bash
-npm install @memory-mcp/common
+npm install @inchankang/zettel-memory-common
 ```
 
 ## 사용법
@@ -22,9 +22,9 @@ import {
   generateUid,
   FrontMatterSchema,
   PARA_CATEGORIES,
-  MemoryMcpError,
+  ZettelMemoryError,
   ErrorCode
-} from '@memory-mcp/common';
+} from '@inchankang/zettel-memory-common';
 
 // UID 생성
 const uid = generateUid(); // "20250927T103000Z"
@@ -58,7 +58,7 @@ const validated = FrontMatterSchema.parse(frontMatter);
 
 ### 에러 처리
 
-- `MemoryMcpError`: 기본 에러 클래스
+- `ZettelMemoryError`: 기본 에러 클래스
 - `FileSystemError`: 파일 시스템 에러
 - `ValidationError`: 스키마 검증 에러
 - `IndexError`: 인덱스 관련 에러

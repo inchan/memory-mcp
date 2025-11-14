@@ -1,7 +1,7 @@
 # 프로젝트 로드맵
 
-> 프로젝트: **Memory MCP (Olima + Basic-Memory + Zettelkasten + PARA)**  
-> 기준일: 2025-09-26
+> 프로젝트: **Zettel Memory (Olima + Basic-Memory + Zettelkasten + PARA)**
+> 최종 업데이트: 2025-11-14
 
 ## 📋 전체 구조
 

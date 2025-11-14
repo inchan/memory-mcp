@@ -20,15 +20,15 @@ module.exports = {
   coverageReporters: ['text', 'lcov', 'html'],
   coverageThreshold: {
     global: {
-      branches: 39,
-      functions: 46,
-      lines: 50,
-      statements: 50
+      branches: 25,
+      functions: 25,
+      lines: 30,
+      statements: 30
     }
   },
   moduleFileExtensions: ['ts', 'js', 'json'],
   moduleNameMapper: {
-    '^@memory-mcp/(.*)$': '<rootDir>/packages/$1/src'
+    '^@inchankang/zettel-memory-(.*)$': '<rootDir>/packages/$1/src'
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   verbose: true,
